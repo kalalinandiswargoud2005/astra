@@ -192,7 +192,7 @@ public class LiveAttackController {
         recoveryService.generateRecoveryStepsForIncident(incident.getId(), immediateAction, recoveryWorkflow);
 
         // 1. Dispatch attack execution to agent immediately
-        commandDispatchService.queueCommand(
+        com.astra.backend.entity.DeviceCommand cmd = commandDispatchService.queueCommand(
                 targetDevice.getId(),
                 incident.getId(),
                 "EXECUTE_SAFE_ATTACK",
@@ -208,6 +208,10 @@ public class LiveAttackController {
             "animation", "pulse_red"
         ));
 
-        return ResponseEntity.ok(Map.of("status", "Attack Dispatched", "incidentId", incident.getId().toString()));
+        return ResponseEntity.ok(Map.of(
+                "status", "Attack Dispatched",
+                "incidentId", incident.getId().toString(),
+                "commandId", cmd != null && cmd.getId() != null ? cmd.getId().toString() : ""
+        ));
     }
 }

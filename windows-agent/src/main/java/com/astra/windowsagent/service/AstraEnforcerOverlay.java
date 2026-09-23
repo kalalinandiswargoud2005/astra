@@ -11,6 +11,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -406,6 +408,14 @@ public class AstraEnforcerOverlay {
                 autoClose.setRepeats(false);
                 autoClose.start();
 
+                matrixFrame.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        repaintTimer.stop();
+                        autoClose.stop();
+                    }
+                });
+
             } catch (Exception e) {
                 log.error("Failed to render matrix overlay GUI", e);
             }
@@ -416,62 +426,112 @@ public class AstraEnforcerOverlay {
         if (GraphicsEnvironment.isHeadless()) return;
         SwingUtilities.invokeLater(() -> {
             try {
-                JFrame frame = new JFrame("ASTRA EDR — SIMULATED WALLPAPER HIJACK");
+                Toolkit.getDefaultToolkit().beep();
+                JFrame frame = new JFrame("ASTRA EDR — WALLPAPER HIJACK CONTAINMENT");
                 frame.setUndecorated(true);
+                frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
                 frame.setAlwaysOnTop(true);
-                frame.setSize(680, 320);
+                frame.setAutoRequestFocus(true);
+                frame.setFocusableWindowState(true);
 
-                Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-                int x = (screenSize.width - 680) / 2;
-                int y = (screenSize.height - 320) / 2;
-                frame.setLocation(x, y);
+                JPanel panel = new JPanel() {
+                    private float phase = 0f;
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        super.paintComponent(g);
+                        Graphics2D g2 = (Graphics2D) g;
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                        int w = getWidth();
+                        int h = getHeight();
 
-                JPanel panel = new JPanel(new BorderLayout());
-                panel.setBackground(new Color(20, 10, 30));
-                panel.setBorder(BorderFactory.createLineBorder(new Color(255, 80, 220), 3));
+                        phase += 0.05f;
 
-                JLabel header = new JLabel("  🛡️ ASTRA EDR — SIMULATED WALLPAPER HIJACK CONTAINED", JLabel.LEFT);
-                header.setFont(new Font("Consolas", Font.BOLD, 15));
-                header.setForeground(new Color(255, 80, 220));
-                header.setPreferredSize(new Dimension(680, 42));
-                header.setOpaque(true);
-                header.setBackground(new Color(35, 15, 50));
-                panel.add(header, BorderLayout.NORTH);
+                        // Deep purple-magenta dark gradient background
+                        g2.setColor(new Color(15, 6, 25));
+                        g2.fillRect(0, 0, w, h);
 
-                JTextArea textArea = new JTextArea();
-                textArea.setBackground(new Color(20, 10, 30));
-                textArea.setForeground(new Color(255, 160, 235));
-                textArea.setFont(new Font("Consolas", Font.BOLD, 14));
-                textArea.setEditable(false);
-                textArea.setMargin(new Insets(15, 20, 15, 20));
+                        // Animated magenta scanlines
+                        g2.setColor(new Color(255, 60, 200, 35));
+                        for (int y = 0; y < h; y += 12) {
+                            g2.drawLine(0, y, w, y);
+                        }
 
-                String content = String.format("""
-                        ┌────────────────────────────────────────────────────────┐
-                        │                      ASTRA EDR                         │
-                        │             SIMULATED WALLPAPER HIJACK                 │
-                        ├────────────────────────────────────────────────────────┤
-                        │  Detection : Suspicious Desktop Modification Attempt   │
-                        │  Incident  : %-42s│
-                        │  Response  : Autonomous Containment Active             │
-                        ├────────────────────────────────────────────────────────┤
-                        │  ✓ Simulated wallpaper modification BLOCKED            │
-                        │  ✓ Original desktop state preserved                    │
-                        └────────────────────────────────────────────────────────┘
-                        """, incidentId != null ? incidentId : "INC-DEMO-002");
+                        // Thick glowing border
+                        int glowAlpha = (int) (150 + 80 * Math.sin(phase));
+                        g2.setColor(new Color(255, 60, 200, Math.min(255, glowAlpha)));
+                        g2.setStroke(new BasicStroke(8));
+                        g2.drawRect(15, 15, w - 30, h - 30);
 
-                textArea.setText(content);
-                panel.add(new JScrollPane(textArea), BorderLayout.CENTER);
+                        // Top warning banner
+                        g2.setColor(new Color(255, 100, 220));
+                        g2.setFont(new Font("Consolas", Font.BOLD, 26));
+                        String topBanner = "🖼️  [ ASTRA EDR • SUSPICIOUS DESKTOP WALLPAPER TAMPER INTERCEPTED ]  🖼️";
+                        FontMetrics fmTop = g2.getFontMetrics();
+                        g2.drawString(topBanner, (w - fmTop.stringWidth(topBanner)) / 2, 70);
+
+                        // Central Card
+                        int cw = Math.min(780, w - 60);
+                        int ch = 360;
+                        int cx = (w - cw) / 2;
+                        int cy = (h - ch) / 2;
+
+                        g2.setColor(new Color(30, 12, 45, 240));
+                        g2.fillRect(cx, cy, cw, ch);
+                        g2.setColor(new Color(255, 80, 220));
+                        g2.setStroke(new BasicStroke(3));
+                        g2.drawRect(cx, cy, cw, ch);
+
+                        g2.setFont(new Font("Consolas", Font.BOLD, 18));
+                        g2.setColor(new Color(255, 180, 240));
+                        g2.drawString("DETECTION : Unauthorized Desktop Configuration Tamper", cx + 30, cy + 50);
+                        g2.drawString("INCIDENT  : " + (incidentId != null ? incidentId : "INC-WALLPAPER-TAMPER"), cx + 30, cy + 90);
+                        g2.drawString("TARGET    : Desktop Wallpaper & Shell Registry (Active)", cx + 30, cy + 130);
+
+                        g2.setColor(new Color(0, 255, 170));
+                        g2.drawString("PROTECTION: Autonomous Containment Active — Desktop Preserved", cx + 30, cy + 185);
+                        g2.drawString("STATUS    : ✓ Unauthorized Wallpaper Modification BLOCKED", cx + 30, cy + 225);
+                        g2.drawString("VERIFIED  : Clean baseline locked by ASTRA Autonomous EDR", cx + 30, cy + 265);
+
+                        // Dismiss banner
+                        g2.setColor(new Color(0, 220, 255));
+                        g2.setFont(new Font("Consolas", Font.ITALIC, 14));
+                        String dis = "[ PRESS ESC OR CLICK ANYWHERE TO DISMISS OVERLAY ]";
+                        g2.drawString(dis, (w - g2.getFontMetrics().stringWidth(dis)) / 2, h - 45);
+                    }
+                };
+                panel.setOpaque(true);
+
+                panel.addMouseListener(new MouseAdapter() {
+                    @Override public void mouseClicked(MouseEvent e) { frame.dispose(); }
+                });
+                frame.addKeyListener(new KeyAdapter() {
+                    @Override public void keyPressed(KeyEvent e) {
+                        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) frame.dispose();
+                    }
+                });
+
                 frame.add(panel);
                 frame.setVisible(true);
                 frame.toFront();
+                frame.requestFocus();
 
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(6000);
-                    } catch (InterruptedException ignored) {}
-                    SwingUtilities.invokeLater(frame::dispose);
-                }).start();
+                Timer repaintTimer = new Timer(40, e -> {
+                    if (frame.isVisible()) panel.repaint();
+                });
+                repaintTimer.start();
 
+                Timer autoClose = new Timer(15000, e -> frame.dispose());
+                autoClose.setRepeats(false);
+                autoClose.start();
+
+                frame.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        repaintTimer.stop();
+                        autoClose.stop();
+                    }
+                });
             } catch (Exception e) {
                 log.error("Failed to render wallpaper hijack GUI", e);
             }
@@ -482,67 +542,152 @@ public class AstraEnforcerOverlay {
         if (GraphicsEnvironment.isHeadless()) return;
         SwingUtilities.invokeLater(() -> {
             try {
-                JFrame frame = new JFrame("ASTRA EDR — SIMULATED GHOST-TYPER");
+                Toolkit.getDefaultToolkit().beep();
+                JFrame frame = new JFrame("ASTRA EDR — GHOST-TYPER INJECTION HUD");
                 frame.setUndecorated(true);
+                frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
                 frame.setAlwaysOnTop(true);
-                frame.setSize(680, 340);
+                frame.setAutoRequestFocus(true);
+                frame.setFocusableWindowState(true);
 
-                Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-                int x = (screenSize.width - 680) / 2;
-                int y = (screenSize.height - 340) / 2;
-                frame.setLocation(x, y);
+                final String[] terminalLines = new String[]{
+                        "[*] ASTRA EDR INTERCEPTOR ONLINE",
+                        "[!] HEURISTIC ALERT: Rapid Synthetic Keystroke Injection Detected",
+                        "[!] TARGET PID: cmd.exe [Interactive Shell Hook Attempt]",
+                        "[!] INCIDENT ID: " + (incidentId != null ? incidentId : "INC-GHOST-TYPER-007"),
+                        "----------------------------------------------------------------",
+                        "> powershell -NoProfile -ExecutionPolicy Bypass -Command \"Invoke-Payload\"",
+                        "> [INTERCEPTED] Keyboard Hook Disabled by Autonomous Defense",
+                        "> [CONTAINMENT] Freezing unauthorized input stream...",
+                        "> [ISOLATING] Malicious sub-process isolated & neutralized.",
+                        "----------------------------------------------------------------",
+                        "[✓] STATUS: THREAT CONTAINED & TERMINATED IN 14ms"
+                };
 
-                JPanel panel = new JPanel(new BorderLayout());
-                panel.setBackground(new Color(10, 25, 35));
-                panel.setBorder(BorderFactory.createLineBorder(new Color(0, 220, 255), 3));
+                final int[] visibleChars = new int[]{0};
 
-                JLabel header = new JLabel("  ⚡ ASTRA EDR — SIMULATED ATTACK ACTIVITY", JLabel.LEFT);
-                header.setFont(new Font("Consolas", Font.BOLD, 15));
-                header.setForeground(new Color(0, 220, 255));
-                header.setPreferredSize(new Dimension(680, 42));
-                header.setOpaque(true);
-                header.setBackground(new Color(15, 40, 60));
-                panel.add(header, BorderLayout.NORTH);
+                JPanel panel = new JPanel() {
+                    private float phase = 0f;
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        super.paintComponent(g);
+                        Graphics2D g2 = (Graphics2D) g;
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                        int w = getWidth();
+                        int h = getHeight();
 
-                JTextArea textArea = new JTextArea();
-                textArea.setBackground(new Color(10, 25, 35));
-                textArea.setForeground(new Color(100, 240, 255));
-                textArea.setFont(new Font("Consolas", Font.BOLD, 14));
-                textArea.setEditable(false);
-                textArea.setMargin(new Insets(15, 20, 15, 20));
+                        phase += 0.08f;
 
-                panel.add(new JScrollPane(textArea), BorderLayout.CENTER);
+                        // Dark cyan-black console background
+                        g2.setColor(new Color(6, 15, 22));
+                        g2.fillRect(0, 0, w, h);
+
+                        // Cyan scanlines
+                        g2.setColor(new Color(0, 240, 255, 25));
+                        for (int y = 0; y < h; y += 8) {
+                            g2.drawLine(0, y, w, y);
+                        }
+
+                        // Glowing border
+                        g2.setColor(new Color(0, 220, 255));
+                        g2.setStroke(new BasicStroke(6));
+                        g2.drawRect(12, 12, w - 24, h - 24);
+
+                        // Top warning HUD
+                        g2.setColor(new Color(0, 240, 255));
+                        g2.setFont(new Font("Consolas", Font.BOLD, 24));
+                        String title = "⚡ [ ASTRA EDR • GHOST-TYPER KEYSTROKE INJECTION CONTAINMENT HUD ] ⚡";
+                        FontMetrics fm = g2.getFontMetrics();
+                        g2.drawString(title, (w - fm.stringWidth(title)) / 2, 65);
+
+                        // Terminal Box
+                        int tw = Math.min(900, w - 80);
+                        int th = Math.min(520, h - 180);
+                        int tx = (w - tw) / 2;
+                        int ty = 100;
+
+                        g2.setColor(new Color(10, 22, 32, 245));
+                        g2.fillRect(tx, ty, tw, th);
+                        g2.setColor(new Color(0, 180, 220));
+                        g2.setStroke(new BasicStroke(2));
+                        g2.drawRect(tx, ty, tw, th);
+
+                        // Terminal Text Output
+                        g2.setFont(new Font("Consolas", Font.BOLD, 16));
+                        int lineY = ty + 35;
+                        int totalCharsAvailable = visibleChars[0];
+                        int count = 0;
+
+                        for (String line : terminalLines) {
+                            if (totalCharsAvailable <= 0) break;
+                            int len = Math.min(line.length(), totalCharsAvailable);
+                            String toDraw = line.substring(0, len);
+
+                            if (line.startsWith("[!]")) {
+                                g2.setColor(new Color(255, 80, 80));
+                            } else if (line.startsWith("> [INTERCEPTED]") || line.startsWith("> [CONTAINMENT]") || line.startsWith("> [ISOLATING]")) {
+                                g2.setColor(new Color(255, 200, 50));
+                            } else if (line.startsWith("[✓]")) {
+                                g2.setColor(new Color(0, 255, 150));
+                            } else if (line.startsWith(">")) {
+                                g2.setColor(new Color(140, 220, 255));
+                            } else {
+                                g2.setColor(new Color(0, 240, 255));
+                            }
+
+                            g2.drawString(toDraw, tx + 25, lineY);
+                            lineY += 32;
+                            totalCharsAvailable -= line.length();
+                        }
+
+                        // Blinking cursor
+                        if ((int) (phase * 2) % 2 == 0) {
+                            g2.setColor(new Color(0, 255, 170));
+                            g2.fillRect(tx + 25, lineY - 14, 12, 18);
+                        }
+
+                        // Dismiss note
+                        g2.setColor(new Color(0, 220, 255));
+                        g2.setFont(new Font("Consolas", Font.ITALIC, 14));
+                        String dis = "[ PRESS ESC OR CLICK ANYWHERE TO DISMISS OVERLAY ]";
+                        g2.drawString(dis, (w - g2.getFontMetrics().stringWidth(dis)) / 2, h - 40);
+                    }
+                };
+                panel.setOpaque(true);
+
+                panel.addMouseListener(new MouseAdapter() {
+                    @Override public void mouseClicked(MouseEvent e) { frame.dispose(); }
+                });
+                frame.addKeyListener(new KeyAdapter() {
+                    @Override public void keyPressed(KeyEvent e) {
+                        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) frame.dispose();
+                    }
+                });
+
                 frame.add(panel);
                 frame.setVisible(true);
                 frame.toFront();
+                frame.requestFocus();
 
-                String[] stream = {
-                        "ASTRA EDR\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n",
-                        "SIMULATED ATTACK ACTIVITY DETECTED\n",
-                        "Process  : SAFE-DEMO-PROCESS\n",
-                        "Activity : Simulated unauthorized input stream\n",
-                        "Incident : " + (incidentId != null ? incidentId : "INC-DEMO-003") + "\n",
-                        "STATUS   : ⚠ DETECTED\n\n",
-                        "ASTRA RESPONSE:\n",
-                        "  [CONTAINMENT ENGINE ENGAGED]\n",
-                        "  [STOPPING SIMULATION...]\n",
-                        "  ✓ PROCESS CONTAINED & TERMINATED\n",
-                        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-                };
+                // Typer ticker
+                Timer typerTimer = new Timer(30, e -> {
+                    visibleChars[0] += 3;
+                    if (frame.isVisible()) panel.repaint();
+                });
+                typerTimer.start();
 
-                new Thread(() -> {
-                    for (String chunk : stream) {
-                        SwingUtilities.invokeLater(() -> textArea.append(chunk));
-                        try {
-                            Thread.sleep(300);
-                        } catch (InterruptedException ignored) {}
+                Timer autoClose = new Timer(15000, e -> frame.dispose());
+                autoClose.setRepeats(false);
+                autoClose.start();
+
+                frame.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        typerTimer.stop();
+                        autoClose.stop();
                     }
-                    try {
-                        Thread.sleep(4000);
-                    } catch (InterruptedException ignored) {}
-                    SwingUtilities.invokeLater(frame::dispose);
-                }).start();
-
+                });
             } catch (Exception e) {
                 log.error("Failed to render ghost-typer GUI", e);
             }
@@ -626,21 +771,15 @@ public class AstraEnforcerOverlay {
         SwingUtilities.invokeLater(() -> {
             try {
                 Toolkit.getDefaultToolkit().beep();
-                
-                GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment()
-                        .getDefaultScreenDevice().getDefaultConfiguration();
-                Rectangle screenBounds = gc.getBounds();
-
                 JFrame frame = new JFrame("ASTRA EDR — HACKER WALLPAPER HIJACK");
                 frame.setUndecorated(true);
-                frame.setBounds(screenBounds);
-                frame.setSize(screenBounds.width, screenBounds.height);
-                frame.setLocation(screenBounds.x, screenBounds.y);
+                frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
                 frame.setAlwaysOnTop(true);
                 frame.setAutoRequestFocus(true);
                 frame.setFocusableWindowState(true);
 
-                JPanel panel = new JPanel(null) {
+                JPanel panel = new JPanel() {
+                    private float phase = 0f;
                     @Override
                     protected void paintComponent(Graphics g) {
                         super.paintComponent(g);
@@ -648,8 +787,9 @@ public class AstraEnforcerOverlay {
                         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-                        int w = getWidth() > 0 ? getWidth() : screenBounds.width;
-                        int h = getHeight() > 0 ? getHeight() : screenBounds.height;
+                        int w = getWidth();
+                        int h = getHeight();
+                        phase += 0.08f;
 
                         // 1. Solid pitch black background
                         g2.setColor(new Color(6, 6, 12));
@@ -662,7 +802,8 @@ public class AstraEnforcerOverlay {
                         }
 
                         // 3. Thick glowing red border
-                        g2.setColor(new Color(255, 30, 30));
+                        int glowAlpha = (int) (180 + 75 * Math.sin(phase));
+                        g2.setColor(new Color(255, 30, 30, Math.min(255, glowAlpha)));
                         g2.setStroke(new BasicStroke(10));
                         g2.drawRect(12, 12, w - 24, h - 24);
 
@@ -689,10 +830,11 @@ public class AstraEnforcerOverlay {
                         g2.fillOval(cx - 80, cy - 35, 55, 70);
                         g2.fillOval(cx + 25, cy - 35, 55, 70);
 
-                        // Glowing Red Eye Pupils
-                        g2.setColor(new Color(255, 30, 30));
-                        g2.fillOval(cx - 58, cy - 10, 20, 20);
-                        g2.fillOval(cx + 38, cy - 10, 20, 20);
+                        // Glowing Red Eye Pupils (Pulsing)
+                        int eyeGlow = (int) (180 + 75 * Math.sin(phase * 2));
+                        g2.setColor(new Color(255, 30, 30, Math.min(255, eyeGlow)));
+                        g2.fillOval(cx - 58, cy - 10, 22, 22);
+                        g2.fillOval(cx + 38, cy - 10, 22, 22);
 
                         // Nose Cavity
                         g2.setColor(new Color(6, 6, 12));
@@ -752,9 +894,22 @@ public class AstraEnforcerOverlay {
                 frame.toFront();
                 frame.requestFocus();
 
+                Timer repaintTimer = new Timer(40, e -> {
+                    if (frame.isVisible()) panel.repaint();
+                });
+                repaintTimer.start();
+
                 Timer autoClose = new Timer(20000, e -> frame.dispose());
                 autoClose.setRepeats(false);
                 autoClose.start();
+
+                frame.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        repaintTimer.stop();
+                        autoClose.stop();
+                    }
+                });
             } catch (Exception e) {
                 log.error("Failed to render hacker skull GUI", e);
             }
@@ -788,44 +943,75 @@ public class AstraEnforcerOverlay {
                 frame.setFocusableWindowState(true);
 
                 JPanel panel = new JPanel() {
+                    private float phase = 0f;
                     @Override
                     protected void paintComponent(Graphics g) {
                         super.paintComponent(g);
                         Graphics2D g2 = (Graphics2D) g;
                         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
                         int w = getWidth();
                         int h = getHeight();
+                        phase += 0.1f;
 
                         // Solid dark background
                         g2.setColor(new Color(15, 5, 25));
                         g2.fillRect(0, 0, w, h);
 
-                        // Simulated scanlines and memory corruptions
-                        g2.setColor(new Color(255, 0, 128, 120));
+                        // Simulated scanlines and memory glitch noise
+                        g2.setColor(new Color(255, 0, 128, 90));
                         for (int y = 0; y < h; y += 10) {
                             g2.drawLine(0, y, w, y);
                         }
 
-                        g2.setColor(new Color(0, 255, 255));
-                        g2.setFont(new Font("Consolas", Font.BOLD, 28));
+                        // Random glitch blocks
+                        for (int i = 0; i < 15; i++) {
+                            int gx = (int) (Math.random() * (w - 150));
+                            int gy = (int) (Math.random() * (h - 30));
+                            int gw = (int) (Math.random() * 200 + 50);
+                            int gh = (int) (Math.random() * 20 + 5);
+                            g2.setColor(new Color(0, 255, 255, (int)(Math.random() * 120 + 30)));
+                            g2.fillRect(gx, gy, gw, gh);
+                        }
+
+                        // Glitch title with chromatic shift
                         String title = "⚡ [ ZERO-DAY MEMORY CORRUPTION & BUFFER INJECTION DETECTED ] ⚡";
+                        Font titleFont = new Font("Consolas", Font.BOLD, 28);
+                        g2.setFont(titleFont);
                         FontMetrics fm = g2.getFontMetrics();
-                        g2.drawString(title, (w - fm.stringWidth(title)) / 2, h / 2 - 40);
+                        int tx = (w - fm.stringWidth(title)) / 2;
+                        int ty = h / 2 - 40;
+
+                        // Red chromatic offset
+                        g2.setColor(new Color(255, 0, 80, 200));
+                        g2.drawString(title, tx + (int)(3 * Math.sin(phase)), ty + 2);
+
+                        // Cyan chromatic offset
+                        g2.setColor(new Color(0, 255, 255));
+                        g2.drawString(title, tx, ty);
 
                         g2.setColor(new Color(255, 255, 0));
-                        g2.setFont(new Font("Consolas", Font.PLAIN, 18));
-                        String sub1 = "HEURISTIC: HEAP_SPRAY_VIOLATION | INCIDENT: " + (incidentId != null ? incidentId : "INC-0DAY");
-                        g2.drawString(sub1, (w - g2.getFontMetrics().stringWidth(sub1)) / 2, h / 2 + 10);
+                        g2.setFont(new Font("Consolas", Font.BOLD, 18));
+                        String sub1 = "HEURISTIC: HEAP_SPRAY_VIOLATION | INCIDENT: " + (incidentId != null ? incidentId : "INC-0DAY-MEMORY");
+                        g2.drawString(sub1, (w - g2.getFontMetrics().stringWidth(sub1)) / 2, h / 2 + 15);
 
-                        g2.setColor(new Color(100, 255, 100));
-                        String sub2 = "ASTRA Autonomous Memory Guard: Stack integrity preserved. Target contained.";
-                        g2.drawString(sub2, (w - g2.getFontMetrics().stringWidth(sub2)) / 2, h / 2 + 40);
+                        g2.setColor(new Color(0, 255, 140));
+                        String sub2 = "ASTRA Autonomous Memory Guard: Stack integrity preserved. Injected buffer neutralized.";
+                        g2.drawString(sub2, (w - g2.getFontMetrics().stringWidth(sub2)) / 2, h / 2 + 50);
+
+                        // Simulated memory addresses
+                        g2.setFont(new Font("Consolas", Font.PLAIN, 12));
+                        g2.setColor(new Color(255, 120, 200, 180));
+                        for (int j = 0; j < 6; j++) {
+                            String hexLine = String.format("0x%08X: 90 90 CC CC E8 %02X %02X FF FF [CORRUPTED_STACK_DUMP]", 0x7FFE0000 + j * 0x10, (int)(Math.random()*255), (int)(Math.random()*255));
+                            g2.drawString(hexLine, 40, h - 160 + j * 18);
+                        }
 
                         g2.setColor(new Color(0, 220, 255));
                         g2.setFont(new Font("Consolas", Font.ITALIC, 14));
                         String dis = "[ PRESS ESC OR CLICK ANYWHERE TO DISMISS ]";
-                        g2.drawString(dis, (w - g2.getFontMetrics().stringWidth(dis)) / 2, h - 50);
+                        g2.drawString(dis, (w - g2.getFontMetrics().stringWidth(dis)) / 2, h - 35);
                     }
                 };
                 panel.setOpaque(true);
@@ -837,14 +1023,28 @@ public class AstraEnforcerOverlay {
                         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) frame.dispose();
                     }
                 });
+
                 frame.add(panel);
                 frame.setVisible(true);
                 frame.toFront();
                 frame.requestFocus();
 
-                Timer autoClose = new Timer(10000, e -> frame.dispose());
+                Timer repaintTimer = new Timer(40, e -> {
+                    if (frame.isVisible()) panel.repaint();
+                });
+                repaintTimer.start();
+
+                Timer autoClose = new Timer(15000, e -> frame.dispose());
                 autoClose.setRepeats(false);
                 autoClose.start();
+
+                frame.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        repaintTimer.stop();
+                        autoClose.stop();
+                    }
+                });
             } catch (Exception e) {
                 log.error("Failed to render glitch GUI", e);
             }
@@ -869,49 +1069,140 @@ public class AstraEnforcerOverlay {
         if (GraphicsEnvironment.isHeadless()) return;
         SwingUtilities.invokeLater(() -> {
             try {
+                Toolkit.getDefaultToolkit().beep();
                 JFrame frame = new JFrame("ASTRA EDR — C2 RADAR INTERCEPT");
                 frame.setUndecorated(true);
-                frame.setSize(600, 500);
-                Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-                frame.setLocation((screen.width - 600) / 2, (screen.height - 500) / 2);
+                frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
                 frame.setAlwaysOnTop(true);
+                frame.setAutoRequestFocus(true);
+                frame.setFocusableWindowState(true);
 
-                JPanel panel = new JPanel(new BorderLayout());
-                panel.setBackground(new Color(5, 15, 25));
-                panel.setBorder(BorderFactory.createLineBorder(new Color(0, 255, 128), 3));
+                JPanel panel = new JPanel() {
+                    private double sweepAngle = 0.0;
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        super.paintComponent(g);
+                        Graphics2D g2 = (Graphics2D) g;
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-                JLabel title = new JLabel("  📡 ASTRA RADAR: ROGUE C2 BEACON INTERCEPTED (PORT 44444)", JLabel.LEFT);
-                title.setForeground(new Color(0, 255, 128));
-                title.setFont(new Font("Consolas", Font.BOLD, 14));
-                panel.add(title, BorderLayout.NORTH);
+                        int w = getWidth();
+                        int h = getHeight();
+                        sweepAngle += 0.05;
 
-                JTextArea text = new JTextArea("""
-                        [+] LISTENER DETECTED ON TCP 127.0.0.1:44444
-                        [+] BEACON INTERVAL: 3000ms
-                        [+] THREAT VECTOR  : STEALTH_RAT_BACKDOOR
-                        [+] STATUS         : BLOCKED & RECORDED IN AUDIT LOG
-                        [+] ACTION REQUIRED: DISARM VIA DASHBOARD RECOVERY STEP
-                        """);
-                text.setBackground(new Color(5, 15, 25));
-                text.setForeground(new Color(150, 255, 200));
-                text.setFont(new Font("Consolas", Font.BOLD, 13));
-                text.setEditable(false);
-                text.setMargin(new Insets(20, 20, 20, 20));
-                panel.add(text, BorderLayout.CENTER);
+                        // Deep radar navy background
+                        g2.setColor(new Color(5, 15, 24));
+                        g2.fillRect(0, 0, w, h);
 
-                JButton btn = new JButton("ACKNOWLEDGE & DISMISS");
-                btn.setBackground(new Color(10, 40, 30));
-                btn.setForeground(new Color(0, 255, 128));
-                btn.setFont(new Font("Consolas", Font.BOLD, 12));
-                btn.addActionListener(e -> frame.dispose());
-                panel.add(btn, BorderLayout.SOUTH);
+                        // Top warning banner
+                        g2.setColor(new Color(0, 255, 140));
+                        g2.setFont(new Font("Consolas", Font.BOLD, 24));
+                        String title = "📡  [ ASTRA EDR • C2 RADAR TELEMETRY & BEACON INTERCEPT HUD ]  📡";
+                        FontMetrics fm = g2.getFontMetrics();
+                        g2.drawString(title, (w - fm.stringWidth(title)) / 2, 60);
+
+                        // Radar Circle Dimensions
+                        int cx = w / 2;
+                        int cy = h / 2 + 10;
+                        int radius = Math.min(w, h) / 2 - 90;
+
+                        // Concentric range circles
+                        g2.setColor(new Color(0, 255, 140, 60));
+                        g2.setStroke(new BasicStroke(1.5f));
+                        for (int r = radius / 4; r <= radius; r += radius / 4) {
+                            g2.drawOval(cx - r, cy - r, r * 2, r * 2);
+                        }
+
+                        // Crosshairs
+                        g2.drawLine(cx - radius, cy, cx + radius, cy);
+                        g2.drawLine(cx, cy - radius, cx, cy + radius);
+
+                        // Rotating Sonar Beam Sweep
+                        int sweepX = (int) (cx + radius * Math.cos(sweepAngle));
+                        int sweepY = (int) (cy + radius * Math.sin(sweepAngle));
+
+                        g2.setColor(new Color(0, 255, 140, 220));
+                        g2.setStroke(new BasicStroke(3));
+                        g2.drawLine(cx, cy, sweepX, sweepY);
+
+                        // Sweep fan gradient trail
+                        for (int i = 1; i <= 30; i++) {
+                            double trailAngle = sweepAngle - (i * 0.015);
+                            int tx = (int) (cx + radius * Math.cos(trailAngle));
+                            int ty = (int) (cy + radius * Math.sin(trailAngle));
+                            g2.setColor(new Color(0, 255, 140, Math.max(0, 100 - i * 3)));
+                            g2.drawLine(cx, cy, tx, ty);
+                        }
+
+                        // Intercepted C2 Blip on Loopback TCP 44444
+                        int blipX = cx + (int) (radius * 0.65 * Math.cos(1.2));
+                        int blipY = cy + (int) (radius * 0.65 * Math.sin(1.2));
+                        int blipGlow = (int) (160 + 90 * Math.sin(sweepAngle * 3));
+
+                        g2.setColor(new Color(255, 50, 50, Math.min(255, blipGlow)));
+                        g2.fillOval(blipX - 10, blipY - 10, 20, 20);
+                        g2.setColor(new Color(255, 255, 255));
+                        g2.setFont(new Font("Consolas", Font.BOLD, 13));
+                        g2.drawString("⚠️ TARGET BEACON: TCP 127.0.0.1:44444", blipX + 15, blipY + 5);
+
+                        // Stats Telemetry Panel (Left)
+                        g2.setColor(new Color(8, 28, 42, 220));
+                        g2.fillRect(35, 90, 340, 220);
+                        g2.setColor(new Color(0, 220, 255));
+                        g2.setStroke(new BasicStroke(2));
+                        g2.drawRect(35, 90, 340, 220);
+
+                        g2.setFont(new Font("Consolas", Font.BOLD, 14));
+                        g2.setColor(new Color(0, 240, 255));
+                        g2.drawString("INTERCEPTED C2 TELEMETRY", 50, 120);
+                        g2.setFont(new Font("Consolas", Font.PLAIN, 12));
+                        g2.setColor(new Color(180, 230, 255));
+                        g2.drawString("• Port Binding   : 127.0.0.1:44444", 50, 150);
+                        g2.drawString("• Protocol       : TCP / Loopback RAT", 50, 175);
+                        g2.drawString("• Beacon Interval: 3000ms Synthetic", 50, 200);
+                        g2.drawString("• Incident Ref   : " + (incidentId != null ? incidentId : "INC-RADAR-44444"), 50, 225);
+                        g2.setColor(new Color(0, 255, 140));
+                        g2.drawString("• Autonomous EDR : PORT INTERCEPTED", 50, 255);
+                        g2.drawString("• Remediation    : CLOSE_BACKDOOR READY", 50, 280);
+
+                        // Dismiss note
+                        g2.setColor(new Color(0, 220, 255));
+                        g2.setFont(new Font("Consolas", Font.ITALIC, 14));
+                        String dis = "[ PRESS ESC OR CLICK ANYWHERE TO DISMISS OVERLAY ]";
+                        g2.drawString(dis, (w - g2.getFontMetrics().stringWidth(dis)) / 2, h - 35);
+                    }
+                };
+                panel.setOpaque(true);
+                panel.addMouseListener(new MouseAdapter() {
+                    @Override public void mouseClicked(MouseEvent e) { frame.dispose(); }
+                });
+                frame.addKeyListener(new KeyAdapter() {
+                    @Override public void keyPressed(KeyEvent e) {
+                        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) frame.dispose();
+                    }
+                });
 
                 frame.add(panel);
                 frame.setVisible(true);
+                frame.toFront();
+                frame.requestFocus();
 
-                Timer autoClose = new Timer(10000, e -> frame.dispose());
+                Timer repaintTimer = new Timer(40, e -> {
+                    if (frame.isVisible()) panel.repaint();
+                });
+                repaintTimer.start();
+
+                Timer autoClose = new Timer(15000, e -> frame.dispose());
                 autoClose.setRepeats(false);
                 autoClose.start();
+
+                frame.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        repaintTimer.stop();
+                        autoClose.stop();
+                    }
+                });
             } catch (Exception e) {
                 log.error("Failed to render radar GUI", e);
             }
@@ -935,6 +1226,7 @@ public class AstraEnforcerOverlay {
         if (GraphicsEnvironment.isHeadless()) return;
         SwingUtilities.invokeLater(() -> {
             try {
+                Toolkit.getDefaultToolkit().beep();
                 JFrame frame = new JFrame("ASTRA EDR — HEXAGONAL DEFENSE SHIELD");
                 frame.setUndecorated(true);
                 frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -942,48 +1234,101 @@ public class AstraEnforcerOverlay {
                 frame.setAutoRequestFocus(true);
                 frame.setFocusableWindowState(true);
 
-                JPanel panel = new JPanel(new GridBagLayout());
-                panel.setBackground(new Color(8, 20, 40, 230));
+                JPanel panel = new JPanel() {
+                    private float phase = 0f;
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        super.paintComponent(g);
+                        Graphics2D g2 = (Graphics2D) g;
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-                JPanel card = new JPanel(new BorderLayout());
-                card.setPreferredSize(new Dimension(780, 380));
-                card.setBackground(new Color(12, 28, 55));
-                card.setBorder(BorderFactory.createLineBorder(new Color(0, 210, 255), 3));
+                        int w = getWidth();
+                        int h = getHeight();
+                        phase += 0.06f;
 
-                JLabel title = new JLabel("  🛡️ ASTRA AUTONOMOUS CYBER DEFENSE SHIELD ENGAGED", JLabel.LEFT);
-                title.setForeground(new Color(0, 210, 255));
-                title.setFont(new Font("Consolas", Font.BOLD, 16));
-                title.setPreferredSize(new Dimension(780, 48));
-                title.setOpaque(true);
-                title.setBackground(new Color(18, 42, 80));
-                card.add(title, BorderLayout.NORTH);
+                        // Deep dark blue-cyan security background
+                        g2.setColor(new Color(6, 16, 32));
+                        g2.fillRect(0, 0, w, h);
 
-                JTextArea text = new JTextArea("""
-                        [SHIELD LEVEL 5] - ENDPOINT HARDENING ACTIVE
-                        ===================================================
-                        [*] HOST FIREWALL PROFILE    : ENFORCED (ALL PROFILES)
-                        [*] MICROSOFT DEFENDER RT    : ACTIVE & MONITORING
-                        [*] INTEGRITY AGENT          : 18 REALTIME MONITORS ONLINE
-                        [*] PROTECTED TARGET         : """ + (target != null ? target : "Local Workstation") + """
-                        \n===================================================
-                        ALL PERIMETERS SECURE. ATTACK VECTOR CONTAINED.
-                        """);
-                text.setBackground(new Color(12, 28, 55));
-                text.setForeground(new Color(180, 235, 255));
-                text.setFont(new Font("Consolas", Font.BOLD, 14));
-                text.setEditable(false);
-                text.setMargin(new Insets(20, 25, 20, 25));
-                card.add(text, BorderLayout.CENTER);
+                        // Draw Hexagonal Matrix Grid across background
+                        int hexSize = 55;
+                        double hexH = Math.sqrt(3) * hexSize;
+                        g2.setColor(new Color(0, 210, 255, 30));
+                        g2.setStroke(new BasicStroke(1.2f));
 
-                JButton btn = new JButton("CLOSE HUD [ESC]");
-                btn.setBackground(new Color(18, 42, 80));
-                btn.setForeground(new Color(0, 210, 255));
-                btn.setFont(new Font("Consolas", Font.BOLD, 13));
-                btn.setPreferredSize(new Dimension(780, 40));
-                btn.addActionListener(e -> frame.dispose());
-                card.add(btn, BorderLayout.SOUTH);
+                        for (int col = -1; col < w / (hexSize * 1.5) + 2; col++) {
+                            for (int row = -1; row < h / hexH + 2; row++) {
+                                double hx = col * hexSize * 1.5;
+                                double hy = row * hexH + ((col % 2 == 0) ? 0 : hexH / 2);
+                                drawHexagon(g2, (int) hx, (int) hy, hexSize - 4);
+                            }
+                        }
 
-                panel.add(card);
+                        // Outer pulsing cyan containment barrier
+                        int borderGlow = (int) (170 + 80 * Math.sin(phase));
+                        g2.setColor(new Color(0, 220, 255, Math.min(255, borderGlow)));
+                        g2.setStroke(new BasicStroke(8));
+                        g2.drawRect(15, 15, w - 30, h - 30);
+
+                        // Top Title Banner
+                        g2.setColor(new Color(0, 240, 255));
+                        g2.setFont(new Font("Consolas", Font.BOLD, 26));
+                        String topBanner = "🛡️  [ ASTRA AUTONOMOUS CYBER DEFENSE SHIELD — LEVEL 5 ACTIVE ]  🛡️";
+                        FontMetrics fmTop = g2.getFontMetrics();
+                        g2.drawString(topBanner, (w - fmTop.stringWidth(topBanner)) / 2, 65);
+
+                        // Central Defense Telemetry Card
+                        int cw = Math.min(820, w - 60);
+                        int ch = 400;
+                        int cx = (w - cw) / 2;
+                        int cy = (h - ch) / 2;
+
+                        g2.setColor(new Color(10, 28, 55, 240));
+                        g2.fillRect(cx, cy, cw, ch);
+                        g2.setColor(new Color(0, 210, 255));
+                        g2.setStroke(new BasicStroke(3));
+                        g2.drawRect(cx, cy, cw, ch);
+
+                        // Status rows
+                        g2.setFont(new Font("Consolas", Font.BOLD, 18));
+                        g2.setColor(new Color(0, 240, 255));
+                        g2.drawString("SHIELD STATUS: 100% OPERATIONAL • LEVEL 5 HARDENED", cx + 35, cy + 45);
+
+                        g2.setFont(new Font("Consolas", Font.PLAIN, 15));
+                        g2.setColor(new Color(180, 235, 255));
+                        g2.drawString("=================================================================", cx + 35, cy + 75);
+
+                        g2.drawString("[✓] HOST FIREWALL PROFILE    : ENFORCED (ALL DOMAIN/PRIVATE/PUBLIC)", cx + 35, cy + 115);
+                        g2.drawString("[✓] MICROSOFT DEFENDER RT    : ACTIVE & REAL-TIME INTERCEPT ON", cx + 35, cy + 155);
+                        g2.drawString("[✓] INTEGRITY AUDIT AGENT    : 18 LOW-LATENCY PROBES VERIFIED", cx + 35, cy + 195);
+                        g2.drawString("[✓] NETWORK ISOLATION MATRIX : DEFENSIVE BARRIER ENGAGED", cx + 35, cy + 235);
+                        g2.drawString("[✓] TARGET WORKSTATION       : " + (target != null ? target : "Local Endpoint"), cx + 35, cy + 275);
+
+                        g2.setFont(new Font("Consolas", Font.BOLD, 16));
+                        g2.setColor(new Color(0, 255, 160));
+                        g2.drawString("ALL PERIMETERS SECURE. SIMULATED ATTACK VECTORS CONTAINED.", cx + 35, cy + 340);
+
+                        // Bottom dismissal instructions
+                        g2.setColor(new Color(0, 220, 255));
+                        g2.setFont(new Font("Consolas", Font.ITALIC, 14));
+                        String dismissMsg = "[ PRESS ESC OR CLICK ANYWHERE TO DISMISS SHIELD HUD ]";
+                        g2.drawString(dismissMsg, (w - g2.getFontMetrics().stringWidth(dismissMsg)) / 2, h - 45);
+                    }
+
+                    private void drawHexagon(Graphics2D g2, int cx, int cy, int size) {
+                        int[] xPoints = new int[6];
+                        int[] yPoints = new int[6];
+                        for (int i = 0; i < 6; i++) {
+                            double angle = Math.PI / 3 * i;
+                            xPoints[i] = (int) (cx + size * Math.cos(angle));
+                            yPoints[i] = (int) (cy + size * Math.sin(angle));
+                        }
+                        g2.drawPolygon(xPoints, yPoints, 6);
+                    }
+                };
+                panel.setOpaque(true);
+
                 panel.addMouseListener(new MouseAdapter() {
                     @Override public void mouseClicked(MouseEvent e) { frame.dispose(); }
                 });
@@ -995,10 +1340,25 @@ public class AstraEnforcerOverlay {
 
                 frame.add(panel);
                 frame.setVisible(true);
+                frame.toFront();
+                frame.requestFocus();
+
+                Timer repaintTimer = new Timer(40, e -> {
+                    if (frame.isVisible()) panel.repaint();
+                });
+                repaintTimer.start();
 
                 Timer autoClose = new Timer(15000, e -> frame.dispose());
                 autoClose.setRepeats(false);
                 autoClose.start();
+
+                frame.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        repaintTimer.stop();
+                        autoClose.stop();
+                    }
+                });
             } catch (Exception e) {
                 log.error("Failed to render hex shield GUI", e);
             }

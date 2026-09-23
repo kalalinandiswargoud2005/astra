@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useScopedDevice } from '@/contexts/ScopedDeviceContext';
+import { formatIncidentTime, formatRelativeTime } from '@/utils/timeUtils';
 
 export function Threats() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -197,7 +198,10 @@ export function Threats() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right text-primary/70 font-mono text-xs">
-                        {format(new Date(threat.createdAt || Date.now()), 'HH:mm:ss')}
+                        <div className="flex flex-col items-end">
+                          <span>{formatIncidentTime(threat.createdAt)}</span>
+                          <span className="text-[10px] text-white/40">{formatRelativeTime(threat.createdAt)}</span>
+                        </div>
                       </TableCell>
                     </motion.tr>
                   ))

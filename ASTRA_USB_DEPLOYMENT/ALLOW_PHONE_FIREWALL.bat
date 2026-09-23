@@ -37,9 +37,9 @@ if %errorlevel% equ 0 (
 
 echo.
 echo ====================================================================
-echo   SUCCESS! WINDOWS FIREWALL IS CONFIGURED FOR PHONE ACCESS!
+echo   SUCCESS! WINDOWS FIREWALL IS CONFIGURED FOR INBOUND ACCESS!
 echo ====================================================================
 echo.
-echo Your phone can now open http://192.168.1.46:5173/remote
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ip = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -notlike '*Loopback*' -and $_.InterfaceAlias -notlike '*vEthernet*' -and $_.IPAddress -notlike '169.254*' -and $_.IPAddress -notlike '192.168.56*' } | Select-Object -First 1).IPAddress; Write-Host ('Your Phone / Target Laptop can access ASTRA at: http://' + $ip + ':5173') -ForegroundColor Green; Write-Host ('Backend API is available at: http://' + $ip + ':8080') -ForegroundColor Green"
 echo.
 pause

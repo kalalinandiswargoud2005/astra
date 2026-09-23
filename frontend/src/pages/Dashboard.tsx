@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { useScopedDevice } from '@/contexts/ScopedDeviceContext';
+import { formatIncidentTime } from '@/utils/timeUtils';
 
 export function Dashboard() {
   const { subscribe, isConnected } = useWebSocket();
@@ -50,7 +51,7 @@ export function Dashboard() {
         type: t.type,
         severity: t.severity,
         source: t.target,
-        time: new Date(t.createdAt).toLocaleTimeString()
+        time: formatIncidentTime(t.createdAt)
       })));
     }
   }, [initialThreats, scopedDeviceId]);

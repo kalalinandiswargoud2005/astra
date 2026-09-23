@@ -227,11 +227,39 @@ public class AgentController {
         
         UUID deviceId = parseUuidSafe(payload.get("deviceId"));
         String threatId = (String) payload.getOrDefault("threatId", "UNKNOWN");
+        String hostname = (String) payload.get("hostname");
+        String status = (String) payload.getOrDefault("status", "ACTIVE");
         
         Incident incident = new Incident();
         incident.setId(UUID.randomUUID());
-        incident.setTarget(deviceId != null ? deviceId.toString() : "Unknown");
-        incident.setStatus("BLOCKED");
+
+        // Target naming: prioritize hostname with deviceId fallback
+        if (hostname != null && !hostname.isBlank()) {
+            incident.setTarget(hostname.trim());
+        } else if (deviceId != null) {
+            incident.setTarget(deviceRepository.findById(deviceId).map(Device::getName).orElse(deviceId.toString()));
+        } else {
+            incident.setTarget("Target Laptop");
+        }
+
+        incident.setStatus(status != null && !status.isBlank() ? status : "ACTIVE");
+
+        // Parse client detection timestamp to maintain exact forensic timeline sync
+        Object rawTs = payload.get("timestamp");
+        if (rawTs != null && !rawTs.toString().isBlank()) {
+            try {
+                java.time.Instant instant = java.time.Instant.parse(rawTs.toString());
+                incident.setCreatedAt(java.time.LocalDateTime.ofInstant(instant, java.time.ZoneId.systemDefault()));
+            } catch (Exception e1) {
+                try {
+                    incident.setCreatedAt(java.time.LocalDateTime.parse(rawTs.toString()));
+                } catch (Exception e2) {
+                    incident.setCreatedAt(java.time.LocalDateTime.now());
+                }
+            }
+        } else {
+            incident.setCreatedAt(java.time.LocalDateTime.now());
+        }
         
         threatCatalogService.getThreatById(threatId).ifPresentOrElse(
             catalog -> {
@@ -240,19 +268,18 @@ public class AgentController {
                 incident.setSeverity(catalog.getSeverity());
             },
             () -> {
-                incident.setName("Unknown Threat: " + threatId);
-                incident.setType("Unknown");
-                incident.setSeverity("LOW");
+                incident.setName("Threat Detection: " + threatId);
+                incident.setType("Endpoint Alert");
+                incident.setSeverity("HIGH");
             }
         );
 
         incidentRepository.save(incident);
         webSocketPublisher.broadcastNewThreat(incident);
-        // Note: Automatic command dispatch removed. Remediations must be initiated intentionally via Recovery Playbooks or SOC Operator.
-        log.info("[INCIDENT] New incident recorded: ID={}, Name={}, Target={}. Awaiting operator or playbook recovery.", 
-                incident.getId(), incident.getName(), incident.getTarget());
+        log.info("[INCIDENT] New incident recorded: ID={}, Name={}, Target={}, Status={}, CreatedAt={}", 
+                incident.getId(), incident.getName(), incident.getTarget(), incident.getStatus(), incident.getCreatedAt());
 
-        return ResponseEntity.ok(Map.of("status", "reported"));
+        return ResponseEntity.ok(Map.of("status", "reported", "incidentId", incident.getId().toString()));
     }
 
     /**

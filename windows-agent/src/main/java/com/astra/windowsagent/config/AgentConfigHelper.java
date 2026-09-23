@@ -172,20 +172,30 @@ public class AgentConfigHelper {
                 NetworkInterface ni = interfaces.nextElement();
                 if (ni.isLoopback() || !ni.isUp() || ni.isVirtual()) continue;
 
+                String dName = ni.getDisplayName() != null ? ni.getDisplayName().toLowerCase() : "";
+                String name = ni.getName() != null ? ni.getName().toLowerCase() : "";
+                if (dName.contains("virtual") || dName.contains("vbox") || dName.contains("vmware") || 
+                    dName.contains("hyper-v") || dName.contains("wsl") || name.startsWith("veth")) {
+                    continue; // Skip virtual and host-only adapters
+                }
+
                 byte[] mac = ni.getHardwareAddress();
+                String currentMac = null;
                 if (mac != null && mac.length > 0) {
                     StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < mac.length; i++) {
                         sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));
                     }
-                    bestMac = sb.toString();
+                    currentMac = sb.toString();
                 }
 
                 Enumeration<InetAddress> addresses = ni.getInetAddresses();
                 while (addresses.hasMoreElements()) {
                     InetAddress addr = addresses.nextElement();
-                    if (!addr.isLoopbackAddress() && addr.getHostAddress().indexOf(':') == -1) {
-                        bestIp = addr.getHostAddress();
+                    String hostAddr = addr.getHostAddress();
+                    if (!addr.isLoopbackAddress() && hostAddr.indexOf(':') == -1 && !hostAddr.startsWith("169.254.") && !hostAddr.startsWith("192.168.56.")) {
+                        bestIp = hostAddr;
+                        if (currentMac != null) bestMac = currentMac;
                         break;
                     }
                 }
@@ -239,13 +249,16 @@ public class AgentConfigHelper {
         if (primary != null && !primary.isBlank()) {
             list.add(primary);
         }
-        String cloud = "https://aegisx-backend-2k67.onrender.com";
-        if (!list.contains(cloud)) {
-            list.add(cloud);
-        }
-        String local = "http://localhost:8080";
-        if (!list.contains(local)) {
-            list.add(local);
+        // Only include fallback discovery endpoints during initial unauthenticated discovery
+        if (!isRegistered()) {
+            String local = "http://localhost:8080";
+            if (!list.contains(local)) {
+                list.add(local);
+            }
+            String cloud = "https://aegisx-backend-2k67.onrender.com";
+            if (!list.contains(cloud)) {
+                list.add(cloud);
+            }
         }
         return list;
     }

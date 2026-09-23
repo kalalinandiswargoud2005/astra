@@ -8,9 +8,9 @@
   <logpath>%BASE%\logs</logpath>
   <startmode>Automatic</startmode>
   <env name="ASTRA_HOME" value="%BASE%"/>
+  <onfailure action="restart" delay="3 sec"/>
+  <onfailure action="restart" delay="5 sec"/>
   <onfailure action="restart" delay="10 sec"/>
-  <onfailure action="restart" delay="20 sec"/>
-  <onfailure action="restart" delay="30 sec"/>
   <resetfailure>1 hour</resetfailure>
   <serviceaccount>
     <username>NT AUTHORITY\SYSTEM</username>

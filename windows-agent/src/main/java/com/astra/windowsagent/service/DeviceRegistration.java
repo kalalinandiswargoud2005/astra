@@ -20,9 +20,16 @@ import java.util.Map;
 public class DeviceRegistration {
 
     private final AgentConfigHelper configHelper;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = createTimeoutRestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private volatile boolean registered = false;
+
+    private static RestTemplate createTimeoutRestTemplate() {
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(2000);
+        factory.setReadTimeout(3000);
+        return new RestTemplate(factory);
+    }
 
     @EventListener(ApplicationReadyEvent.class)
     public void registerDeviceOnStartup() {

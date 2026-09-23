@@ -2,44 +2,43 @@
                     ASTRA EDR — USB DEPLOYMENT PACKAGE
 ================================================================================
 
-This folder contains everything needed to deploy ASTRA EDR on any Windows target laptop.
+This folder contains everything needed to deploy and test ASTRA EDR on any Windows target laptop.
 
 --------------------------------------------------------------------------------
-HOW TO USE WITH A USB PEN DRIVE:
+HOW TO DEPLOY ON TARGET LAPTOP (3 STEPS):
 --------------------------------------------------------------------------------
 
-STEP 1: COPY TO USB
-   - Insert your USB Pen Drive into your main laptop.
-   - Copy the entire "ASTRA_USB_DEPLOYMENT" folder (or all files inside it) 
-     onto your USB drive.
+STEP 1: PREPARE USB
+   - Copy this entire folder to a USB drive.
 
 STEP 2: PLUG INTO TARGET LAPTOP
-   - Take the USB drive to any target Windows laptop.
-   - Plug the USB drive in.
+   - Connect target laptop and SOC laptop to the SAME Wi-Fi or Mobile Hotspot.
+   - Run "ALLOW_PHONE_FIREWALL.bat" on the SOC laptop once to open firewall port 8080.
 
-STEP 3: INSTALL (1-CLICK)
-   - Open the USB drive.
-   - RIGHT-CLICK on "INSTALL_ASTRA.bat" and choose "Run as administrator".
-   - Enter your SOC Server IP (e.g. http://192.168.1.50:8080) if prompted, 
-     or press Enter for localhost.
-   - That's it! 
+STEP 3: 1-CLICK INSTALLATION
+   - Open the USB drive on the target laptop.
+   - RIGHT-CLICK "INSTALL_ASTRA.bat" -> "Run as administrator".
+   - Enter your SOC Server IP (e.g. http://192.168.1.44:8080) when prompted, or press ENTER.
+   - Done! The target laptop is now permanently connected to the SOC Control Room.
 
 --------------------------------------------------------------------------------
-AUTOMATIC BEHAVIOR ON TARGET LAPTOP:
+VERIFYING CONNECTION:
 --------------------------------------------------------------------------------
-1. The agent installs into C:\Astra\Agent\.
-2. Automatically registers with your ASTRA Control Room.
-3. Automatically starts on every Windows boot and reboot.
-4. Automatically launches the Desktop Visual HUD upon user login.
-5. Zero manual commands or terminal windows needed!
-6. You can safely unplug the USB drive immediately after installation.
+1. Look at your SOC Dashboard (http://localhost:5173/devices) - the laptop will be ONLINE.
+2. Run "TEST_AGENT_DIAGNOSTICS.bat" to run a 5-point health check anytime.
+3. Run "VIEW_LOGS.bat" to inspect live agent activity.
 
 --------------------------------------------------------------------------------
 FILES IN THIS USB FOLDER:
 --------------------------------------------------------------------------------
-1. INSTALL_ASTRA.bat    -> 1-Click Administrator Setup
-2. UNINSTALL_ASTRA.bat  -> 1-Click Clean Removal
-3. windows-agent.jar    -> Standalone ASTRA EDR Engine (Compiled Binary)
-4. Astra-UI.vbs         -> Silent Desktop UI HUD Launcher
-5. README.txt           -> This quick instruction guide
+1. INSTALL_ASTRA.bat           -> 1-Click Automated Setup (Auto-starts on reboot)
+2. UNINSTALL_ASTRA.bat         -> Complete Clean Removal (Removes services and files)
+3. TEST_AGENT_DIAGNOSTICS.bat  -> 5-point health, network, and process check
+4. TEST_CONNECTION.bat         -> Ping and HTTP verification to SOC laptop
+5. START_FOREGROUND_DEBUG.bat  -> Interactive live log console for presentations
+6. START_BACKGROUND_SILENT.bat -> Quick restart in silent background mode
+7. VIEW_LOGS.bat               -> Live agent event logs
+8. ALLOW_PHONE_FIREWALL.bat    -> Firewall opener for SOC laptop
+9. windows-agent.jar           -> Standalone ASTRA EDR Engine (Java 21)
+10. Astra-UI.vbs               -> Desktop HUD Companion Launcher
 ================================================================================

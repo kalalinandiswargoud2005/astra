@@ -14,6 +14,15 @@ public class AuthController {
 
     private final AuthService authService;
 
+    @GetMapping("/health")
+    public ResponseEntity<java.util.Map<String, Object>> health() {
+        return ResponseEntity.ok(java.util.Map.of(
+                "status", "UP",
+                "system", "ASTRA-C2-BACKEND",
+                "timestamp", System.currentTimeMillis()
+        ));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
             @RequestBody AuthRequest request

@@ -12,7 +12,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 @Slf4j
@@ -59,10 +61,32 @@ public class UsbDeploymentService {
     }
 
     /**
-     * Get Server Host IP
+     * Get Server Host IP (filters virtual/loopback adapters to prioritize true physical LAN IP)
      */
     public String getHostIpAddress() {
         try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface ni = interfaces.nextElement();
+                if (ni.isLoopback() || !ni.isUp() || ni.isVirtual()) continue;
+
+                String dName = ni.getDisplayName() != null ? ni.getDisplayName().toLowerCase() : "";
+                String name = ni.getName() != null ? ni.getName().toLowerCase() : "";
+                if (dName.contains("virtual") || dName.contains("vbox") || dName.contains("vmware") || 
+                    dName.contains("hyper-v") || dName.contains("wsl") || name.startsWith("veth")) {
+                    continue;
+                }
+
+                Enumeration<InetAddress> addresses = ni.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    String hostAddr = addr.getHostAddress();
+                    if (!addr.isLoopbackAddress() && hostAddr.indexOf(':') == -1 && 
+                        !hostAddr.startsWith("169.254.") && !hostAddr.startsWith("192.168.56.")) {
+                        return hostAddr;
+                    }
+                }
+            }
             return InetAddress.getLocalHost().getHostAddress();
         } catch (Exception e) {
             return "127.0.0.1";
@@ -123,7 +147,13 @@ public class UsbDeploymentService {
                 log.warn("Source windows-agent.jar could not be located in project root: {}", projectRoot.getAbsolutePath());
             }
 
-            // 2. Copy Core Scripts (Install-Astra.bat, Install-Astra.ps1, Uninstall-Astra.bat, Uninstall-Astra.ps1, start-agent.ps1)
+            // 2. Copy Core Scripts and Diagnostics
+            copyIfExists(findFile(projectRoot, "ASTRA_USB_DEPLOYMENT/INSTALL_ASTRA.bat", "INSTALL_ASTRA.bat"), new File(targetDir, "INSTALL_ASTRA.bat"));
+            copyIfExists(findFile(projectRoot, "ASTRA_USB_DEPLOYMENT/TEST_AGENT_DIAGNOSTICS.bat", "TEST_AGENT_DIAGNOSTICS.bat"), new File(targetDir, "TEST_AGENT_DIAGNOSTICS.bat"));
+            copyIfExists(findFile(projectRoot, "ASTRA_USB_DEPLOYMENT/START_BACKGROUND_SILENT.bat", "START_BACKGROUND_SILENT.bat"), new File(targetDir, "START_BACKGROUND_SILENT.bat"));
+            copyIfExists(findFile(projectRoot, "ASTRA_USB_DEPLOYMENT/START_FOREGROUND_DEBUG.bat", "START_FOREGROUND_DEBUG.bat"), new File(targetDir, "START_FOREGROUND_DEBUG.bat"));
+            copyIfExists(findFile(projectRoot, "ASTRA_USB_DEPLOYMENT/TEST_CONNECTION.bat", "TEST_CONNECTION.bat"), new File(targetDir, "TEST_CONNECTION.bat"));
+            copyIfExists(findFile(projectRoot, "ASTRA_USB_DEPLOYMENT/ALLOW_PHONE_FIREWALL.bat", "ALLOW_PHONE_FIREWALL.bat"), new File(targetDir, "ALLOW_PHONE_FIREWALL.bat"));
             copyIfExists(findFile(projectRoot, "Install-Astra.bat"), new File(targetDir, "Install-Astra.bat"));
             copyIfExists(findFile(projectRoot, "Install-Astra.ps1"), new File(targetDir, "Install-Astra.ps1"));
             copyIfExists(findFile(projectRoot, "Uninstall-Astra.bat"), new File(targetDir, "Uninstall-Astra.bat"));

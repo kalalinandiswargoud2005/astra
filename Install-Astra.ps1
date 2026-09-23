@@ -8,7 +8,7 @@
 
 [CmdletBinding()]
 param (
-    [string]$BackendUrl = "http://localhost:8080",
+    [string]$BackendUrl = "",
     [string]$DeviceId = "",
     [string]$Hostname = $env:COMPUTERNAME,
     [string]$InstallDir = "C:\Astra\Agent"
@@ -26,6 +26,27 @@ Write-Host "===================================================" -ForegroundColo
 Write-Host "   ASTRA EDR AGENT - WINDOWS SERVICE INSTALLER     " -ForegroundColor Cyan
 Write-Host "===================================================" -ForegroundColor Cyan
 Write-Host ""
+
+# Resolve Backend URL from device.json or interactive prompt
+$progDataJson = "C:\ProgramData\Astra\agent\device.json"
+if ([string]::IsNullOrWhiteSpace($BackendUrl)) {
+    if (Test-Path $progDataJson) {
+        try {
+            $jsonObj = Get-Content $progDataJson -Raw | ConvertFrom-Json
+            if ($jsonObj.backendUrl) { $BackendUrl = $jsonObj.backendUrl }
+        } catch {}
+    }
+}
+if ([string]::IsNullOrWhiteSpace($BackendUrl)) {
+    $defaultUrl = "http://192.168.1.44:8080"
+    $inputUrl = Read-Host "Enter ASTRA SOC Server URL [default: $defaultUrl]"
+    if ([string]::IsNullOrWhiteSpace($inputUrl)) {
+        $BackendUrl = $defaultUrl
+    } else {
+        $BackendUrl = $inputUrl.Trim()
+    }
+}
+$BackendUrl = $BackendUrl.TrimEnd('/')
 
 # 2. Resolve / Preserve Persistent Device UUID
 $idFilePath = Join-Path $InstallDir "device-id.txt"

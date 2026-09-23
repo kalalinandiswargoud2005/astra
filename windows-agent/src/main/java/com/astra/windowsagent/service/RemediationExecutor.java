@@ -220,6 +220,7 @@ public class RemediationExecutor {
                     processService.closeRogueWindow(target);
                     networkService.stopDemoListener(44444);
                     fileService.restoreDemoFiles(incidentId);
+                    demoSimulationService.cleanupSimulation(incidentId);
                     verificationResult = "SUCCESS";
                     executionMessage = "VERIFIED_SUCCESS: Safe attack simulation stopped and sandbox reset";
                     break;

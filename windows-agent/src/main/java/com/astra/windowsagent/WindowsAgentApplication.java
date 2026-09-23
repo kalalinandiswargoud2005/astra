@@ -36,6 +36,18 @@ public class WindowsAgentApplication {
             return;
         }
 
+        // Enforce single-instance main agent per system to prevent duplicate processes
+        try {
+            java.net.ServerSocket lockSocket = new java.net.ServerSocket(58081, 0, java.net.InetAddress.getByName("127.0.0.1"));
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try { lockSocket.close(); } catch (Exception ignored) {}
+            }));
+        } catch (Exception e) {
+            log.warn("[ASTRA-AGENT] Another instance of ASTRA Windows Agent is already running on this endpoint. Exiting duplicate process.");
+            System.err.println("[ASTRA-AGENT] Another instance of ASTRA Windows Agent is already running. Exiting.");
+            return;
+        }
+
         // Full EDR Windows Service Mode with GUI Overlay capability
         new org.springframework.boot.builder.SpringApplicationBuilder(WindowsAgentApplication.class)
                 .headless(false)

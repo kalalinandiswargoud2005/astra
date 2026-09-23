@@ -15,6 +15,7 @@ import api from '@/lib/api';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import jsPDF from 'jspdf';
+import { formatIncidentDateTime } from '@/utils/timeUtils';
 
 const PIE_COLORS = ['#FF3D71', '#FF9F43', '#FFC107', '#00E5FF', '#7C3AED'];
 
@@ -81,7 +82,7 @@ export function Reports() {
         severity: (item.severity?.toUpperCase() || 'HIGH') as any,
         targetAsset: item.target || 'SEC-NODE-WIN11',
         targetIp: item.ip || '192.168.1.140',
-        timestamp: item.createdAt ? format(new Date(item.createdAt), 'yyyy-MM-dd HH:mm:ss') + ' UTC' : '2026-08-13 21:00:00 UTC',
+        timestamp: formatIncidentDateTime(item.createdAt),
         fileSize: '36 KB',
         status: (item.status?.toUpperCase() || 'REMEDIATED') as any,
         vector: item.vector || 'Unauthorized Socket Packet Injection',

@@ -19,7 +19,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class IncidentReportService {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IncidentReportService.class);
 
     private final IncidentReportRepository reportRepository;
     private final DeviceCommandRepository commandRepository;
@@ -66,3 +65,4 @@ public class IncidentReportService {
         }
     }
 }
+

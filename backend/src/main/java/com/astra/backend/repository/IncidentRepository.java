@@ -9,5 +9,6 @@ import java.util.UUID;
 public interface IncidentRepository extends JpaRepository<Incident, UUID> {
     long countByStatus(String status);
     List<Incident> findByStatusOrderByCreatedAtDesc(String status);
+    List<Incident> findByStatusNotOrderByCreatedAtDesc(String status);
 }
 

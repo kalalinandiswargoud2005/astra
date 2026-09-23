@@ -1,16 +1,41 @@
-import React from 'react';
-import { Search, Bell, Moon, Sun, Globe, Bot } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Bell, Moon, Sun, Globe, Bot, Maximize, Minimize } from 'lucide-react';
 import { Input, Avatar, Tooltip } from '@/components/ui';
 import { useTheme } from '@/providers/theme-provider';
 import { useAssistant } from '@/providers/AssistantProvider';
+import { useWebSocket } from '@/providers/WebSocketProvider';
 import { motion } from 'framer-motion';
 
 export function Header() {
+  const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { toggleAssistant, isAssistantOpen } = useAssistant();
+  const { isConnected } = useWebSocket();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+      setIsFullscreen(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between glass-panel border-b border-x-0 border-t-0 px-6 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between glass-panel !overflow-visible border-b border-x-0 border-t-0 px-6 backdrop-blur-xl">
       <div className="flex items-center gap-4 w-1/3">
         <motion.div 
           className="w-full relative group"
@@ -26,7 +51,29 @@ export function Header() {
         </motion.div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        {/* Live C2 Backend Connection Status Badge */}
+        <div className={`flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-mono font-semibold border transition-all ${
+          isConnected
+            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
+            : 'bg-amber-500/10 text-amber-300 border-amber-500/30 animate-pulse shadow-[0_0_12px_rgba(245,158,11,0.25)]'
+        }`}>
+          <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-amber-400 animate-ping'}`} />
+          <span className="hidden sm:inline">{isConnected ? 'C2 ACTIVE' : 'WAKING UP C2...'}</span>
+          <span className="sm:hidden">{isConnected ? 'C2' : 'SYNC'}</span>
+        </div>
+
+        {/* On-Screen Fullscreen / Kiosk Toggle for Touchscreen */}
+        <Tooltip content={isFullscreen ? "Exit Fullscreen (Kiosk)" : "Enter Fullscreen (Kiosk)"}>
+          <motion.button 
+            whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.1)" }}
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleFullscreen}
+            className="rounded-full p-2 text-white/70 hover:text-white transition-colors border border-transparent hover:border-white/20"
+          >
+            {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
+          </motion.button>
+        </Tooltip>
 
         {/* Manual World Threat Map Button */}
         <Tooltip content="Launch World Threat Map War Room">
@@ -65,11 +112,12 @@ export function Header() {
           </motion.button>
         </Tooltip>
 
-        <Tooltip content="Notifications">
+        <Tooltip content="Notifications & Threat Radar">
           <motion.button 
             whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.1)" }}
             whileTap={{ scale: 0.95 }}
-            className="relative rounded-full p-2 text-white/70 hover:text-white transition-colors border border-transparent hover:border-white/20"
+            onClick={() => navigate('/threats')}
+            className="relative rounded-full p-2 text-white/70 hover:text-white transition-colors border border-transparent hover:border-white/20 cursor-pointer"
           >
             <Bell size={20} />
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-danger animate-pulse shadow-[0_0_8px_rgba(255,61,113,0.8)]" />
@@ -81,7 +129,7 @@ export function Header() {
             whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.1)" }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="rounded-full p-2 text-white/70 hover:text-white transition-colors border border-transparent hover:border-white/20"
+            className="rounded-full p-2 text-white/70 hover:text-white transition-colors border border-transparent hover:border-white/20 cursor-pointer"
           >
             {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
           </motion.button>
@@ -89,11 +137,12 @@ export function Header() {
 
         <div className="h-6 w-px bg-white/10 mx-2 shadow-[0_0_10px_rgba(255,255,255,0.2)]" />
 
-        <Tooltip content="Profile & Settings">
+        <Tooltip content="Profile & System Settings">
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 rounded-full hover:ring-2 hover:ring-primary/50 transition-all outline-none shadow-[0_0_15px_rgba(5,217,232,0.1)] hover:shadow-[0_0_20px_rgba(5,217,232,0.3)]"
+            onClick={() => navigate('/settings')}
+            className="flex items-center gap-2 rounded-full hover:ring-2 hover:ring-primary/50 transition-all outline-none shadow-[0_0_15px_rgba(5,217,232,0.1)] hover:shadow-[0_0_20px_rgba(5,217,232,0.3)] cursor-pointer"
           >
             <Avatar fallback="AX" size="sm" />
           </motion.button>

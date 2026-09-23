@@ -7,6 +7,7 @@ import api from '@/lib/api';
 import { toast } from 'sonner';
 import { AudioAlertService } from '@/services/AudioAlertService';
 import { useScopedDevice } from '@/contexts/ScopedDeviceContext';
+import { formatIncidentTime } from '@/utils/timeUtils';
 
 const SEVERITY_RANK: Record<string, number> = {
   'CRITICAL': 4,
@@ -697,7 +698,7 @@ export function Recovery() {
           <div className="flex-1 rounded-lg bg-[#05070B] p-4 font-mono text-xs overflow-y-auto min-h-[350px] space-y-1.5">
             {activeIncident ? (
               <>
-                <p className="text-white/40">[{new Date(activeIncident.createdAt || Date.now()).toLocaleTimeString()}] Incident "<span className="text-white/70">{activeIncident.name}</span>" detected. Severity: <span className={activeIncident.severity === 'CRITICAL' ? 'text-danger' : activeIncident.severity === 'HIGH' ? 'text-orange-400' : 'text-yellow-400'}>{activeIncident.severity}</span></p>
+                <p className="text-white/40">[{formatIncidentTime(activeIncident.createdAt)}] Incident "<span className="text-white/70">{activeIncident.name}</span>" detected. Severity: <span className={activeIncident.severity === 'CRITICAL' ? 'text-danger' : activeIncident.severity === 'HIGH' ? 'text-orange-400' : 'text-yellow-400'}>{activeIncident.severity}</span></p>
                 <p className="text-white/40">[{new Date().toLocaleTimeString()}] Initiating automated recovery sequence...</p>
                 {immediateActionStep && (
                   <p className="text-danger">[{new Date().toLocaleTimeString()}] ⚡ IMMEDIATE ACTION: {immediateActionStep.title.replace('[Immediate Action] ', '')}</p>

@@ -28,7 +28,7 @@ public class ThreatService {
     private final WebSocketPublisher webSocketPublisher;
 
     public List<Incident> getActiveThreats() {
-        return incidentRepository.findByStatusOrderByCreatedAtDesc("ACTIVE");
+        return incidentRepository.findByStatusNotOrderByCreatedAtDesc("RESOLVED");
     }
     
     public List<Incident> getResolvedThreats() {

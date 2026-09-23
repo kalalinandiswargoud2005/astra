@@ -22,9 +22,8 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @RequiredArgsConstructor
 public class AIService {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AIService.class);
 
-    @Value("${gemini.api.key}")
+    @Value("${gemini.api.key:}")
     private String geminiApiKey;
 
     private final ObjectMapper objectMapper;
@@ -37,6 +36,12 @@ public class AIService {
     private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:streamGenerateContent?alt=sse&key=";
 
     public void processStreamRequest(String sessionId, String fullPrompt, String destination) {
+        if (geminiApiKey == null || geminiApiKey.isBlank() || geminiApiKey.startsWith("${") || geminiApiKey.contains("YOUR_")) {
+            log.info("Gemini API key not configured. Operating in simulated intelligent defense assistant mode.");
+            sendSimulatedResponse(sessionId, fullPrompt, destination);
+            return;
+        }
+
         try {
             List<ConversationManager.Message> history = conversationManager.getHistory(sessionId);
             String requestBody = buildRequestBody(history, fullPrompt);
@@ -289,3 +294,4 @@ public class AIService {
         );
     }
 }
+

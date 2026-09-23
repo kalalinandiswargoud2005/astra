@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Laptop, Server, Smartphone, CheckCircle, XCircle, Settings2, Trash2, AlertTriangle, Eye, Usb, Zap, RotateCw, Download, RefreshCw } from 'lucide-react';
+import { Laptop, Server, Smartphone, CheckCircle, XCircle, Settings2, Trash2, AlertTriangle, Eye, Usb, Zap, RotateCw, Download, RefreshCw, Wifi } from 'lucide-react';
 import { Card, Table, TableHeader, TableRow, TableHead, TableBody, TableCell, Badge, Button, PageContainer, PageHeader, PageSection } from '@/components/ui';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
@@ -163,8 +163,8 @@ export function Devices() {
             onClick={() => setIsUsbModalOpen(true)}
             className="flex items-center gap-2 shadow-[0_0_15px_rgba(0,240,255,0.3)] font-mono text-xs uppercase"
           >
-            <Usb size={16} />
-            Deploy Agent via USB
+            <Wifi size={15} />
+            Enroll Device (Wi-Fi / USB)
           </Button>
         </div>
       </PageHeader>

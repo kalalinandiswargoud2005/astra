@@ -1,737 +1,458 @@
 [
   {
     "threatId": "THREAT-2026-001",
-    "threatName": "Ransomware Document Encryption",
+    "threatName": "LockBit 3.0 Ransomware Staging",
     "category": "Ransomware",
-    "mitreMapping": "T1000",
-    "severity": "MEDIUM",
-    "description": "Simulates rapid file encryption.",
-    "businessImpact": "High risk of data loss.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "mitreMapping": "T1486",
+    "severity": "CRITICAL",
+    "description": "Simulates rapid canary document encryption in safe sandbox boundary.",
+    "businessImpact": "Potential encryption and permanent loss of unbacked data assets.",
+    "detectionLogic": "Heuristic canary file extension watcher detected burst write activity.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "mkdir C:\\Astra\\Financials && echo \"Q3 Report\" > C:\\Astra\\Financials\\report.pdf && explorer C:\\Astra\\Financials && timeout 2 && ren C:\\Astra\\Financials\\*.pdf *.encrypted",
+    "immediateAction": "Freeze Staging Process & Isolate Filesystem",
+    "attackScript": "mkdir C:\\Astra\\Demo\\LockBit && echo Confidential Enterprise Q3 Financials > C:\\Astra\\Demo\\LockBit\\Financials.docx && explorer C:\\Astra\\Demo\\LockBit && timeout 2 && ren C:\\Astra\\Demo\\LockBit\\*.docx *.lockbit",
     "dynamicRecovery": [
       {
-        "name": "Decrypt Files",
-        "script": "ren C:\\Astra\\Financials\\*.encrypted *.pdf"
+        "name": "Decrypt & Revert Documents",
+        "script": "ren C:\\Astra\\Demo\\LockBit\\*.lockbit *.docx"
+      },
+      {
+        "name": "Audit Filesystem Sandbox",
+        "script": "powershell -Command \"Get-ChildItem C:\\Astra\\Demo\\LockBit\""
       }
     ],
-    "aiSummary": "AI detected Ransomware Document Encryption. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "Autonomous AI detected LockBit 3.0 canary encryption behavior. Immediate containment verified.",
+    "estimatedResolutionTime": "15 seconds"
   },
   {
     "threatId": "THREAT-2026-002",
-    "threatName": "Ransomware Image Encryption",
-    "category": "Ransomware",
-    "mitreMapping": "T1000",
-    "severity": "HIGH",
-    "description": "Simulates image file encryption.",
-    "businessImpact": "High risk of data loss.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "threatName": "Cobalt Strike Beacon Staging",
+    "category": "C2 Beacon",
+    "mitreMapping": "T1071",
+    "severity": "CRITICAL",
+    "description": "Simulates adversary command-and-control beacon dropped into temporary staging.",
+    "businessImpact": "Interactive remote adversary command shell on the corporate network.",
+    "detectionLogic": "Network telemetry detected outbound loopback beaconing pattern.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "mkdir C:\\Astra\\Images && echo \"Logo\" > C:\\Astra\\Images\\logo.png && explorer C:\\Astra\\Images && timeout 2 && ren C:\\Astra\\Images\\*.png *.locked",
+    "immediateAction": "Sever Outbound Socket & Quarantine Payload",
+    "attackScript": "mkdir C:\\Astra\\Demo\\Beacon && echo [COBALT-STRIKE-CONFIG] C2=127.0.0.1:44444 Sleep=5 > C:\\Astra\\Demo\\Beacon\\beacon.cfg && explorer C:\\Astra\\Demo\\Beacon",
     "dynamicRecovery": [
       {
-        "name": "Decrypt Images",
-        "script": "ren C:\\Astra\\Images\\*.locked *.png"
+        "name": "Purge Staged Beacon Artifact",
+        "script": "del /f /q C:\\Astra\\Demo\\Beacon\\beacon.cfg"
+      },
+      {
+        "name": "Verify Socket Termination",
+        "script": "powershell -Command \"Get-NetTCPConnection -LocalPort 44444 -ErrorAction SilentlyContinue\""
       }
     ],
-    "aiSummary": "AI detected Ransomware Image Encryption. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "Cobalt Strike listener configuration staged in user temp. Dispatched beacon quarantine.",
+    "estimatedResolutionTime": "20 seconds"
   },
   {
     "threatId": "THREAT-2026-003",
-    "threatName": "Mass File Deletion",
-    "category": "Sabotage",
-    "mitreMapping": "T1000",
+    "threatName": "Privilege Escalation (Guest Admin)",
+    "category": "Identity",
+    "mitreMapping": "T1078",
     "severity": "CRITICAL",
-    "description": "Simulates wiping a critical directory.",
-    "businessImpact": "High risk of data loss.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "description": "Adversary attempts to elevate disabled Guest account into local Administrators.",
+    "businessImpact": "Total endpoint administrative takeover and persistence establishment.",
+    "detectionLogic": "AdministratorMonitor intercepted unauthorized membership change in Administrators group.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "mkdir C:\\Astra\\Critical && echo \"Data\" > C:\\Astra\\Critical\\data.txt && explorer C:\\Astra\\Critical && timeout 2 && del /q C:\\Astra\\Critical\\*.*",
+    "immediateAction": "Revoke Local Admin Privileges & Disable Account",
+    "attackScript": "net localgroup Administrators Guest /add && net user Guest /active:yes",
     "dynamicRecovery": [
       {
-        "name": "Restore from Backup",
-        "script": "echo \"Data (Recovered)\" > C:\\Astra\\Critical\\data.txt"
+        "name": "Revoke Admin Privileges",
+        "script": "net localgroup Administrators Guest /delete"
+      },
+      {
+        "name": "Disable Guest Account",
+        "script": "net user Guest /active:no"
       }
     ],
-    "aiSummary": "AI detected Mass File Deletion. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "Privilege escalation attempt intercepted. Rogue administrative grant automatically rolled back.",
+    "estimatedResolutionTime": "10 seconds"
   },
   {
     "threatId": "THREAT-2026-004",
-    "threatName": "Hidden Folder Creation",
-    "category": "Malware",
-    "mitreMapping": "T1000",
+    "threatName": "Registry Run Key Autorun Persistence",
+    "category": "Persistence",
+    "mitreMapping": "T1547.001",
     "severity": "HIGH",
-    "description": "Creates a hidden folder for malware staging.",
-    "businessImpact": "Malware staging area established.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "description": "Injects malicious autorun registry entry in HKCU Software Microsoft Windows CurrentVersion Run.",
+    "businessImpact": "Malware re-executes upon every user logon automatically.",
+    "detectionLogic": "RegistryMonitor caught unauthorized creation of AstraRogue under Run key.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "mkdir C:\\Astra\\HiddenMalware && attrib +h C:\\Astra\\HiddenMalware && explorer C:\\Astra",
-    "dynamicRecovery": [
-      {
-        "name": "Remove Hidden Folder",
-        "script": "rmdir /S /Q C:\\Astra\\HiddenMalware"
-      }
-    ],
-    "aiSummary": "AI detected Hidden Folder Creation. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-005",
-    "threatName": "Rogue Batch Script Drop",
-    "category": "Malware",
-    "mitreMapping": "T1000",
-    "severity": "MEDIUM",
-    "description": "Drops an executable batch script.",
-    "businessImpact": "Potential code execution.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "mkdir C:\\Astra\\Temp && echo timeout 10 > C:\\Astra\\Temp\\malicious.bat && explorer C:\\Astra\\Temp",
-    "dynamicRecovery": [
-      {
-        "name": "Delete Script",
-        "script": "del C:\\Astra\\Temp\\malicious.bat"
-      }
-    ],
-    "aiSummary": "AI detected Rogue Batch Script Drop. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-011",
-    "threatName": "Task Manager Disabled",
-    "category": "Persistence",
-    "mitreMapping": "T1000",
-    "severity": "MEDIUM",
-    "description": "Disables Task Manager via Registry.",
-    "businessImpact": "Loss of system visibility.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\" /v DisableTaskMgr /t REG_DWORD /d 1 /f && start taskmgr",
-    "dynamicRecovery": [
-      {
-        "name": "Enable Task Manager",
-        "script": "reg delete \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\" /v DisableTaskMgr /f"
-      }
-    ],
-    "aiSummary": "AI detected Task Manager Disabled. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-012",
-    "threatName": "Command Prompt Disabled",
-    "category": "Persistence",
-    "mitreMapping": "T1000",
-    "severity": "CRITICAL",
-    "description": "Disables CMD via Registry.",
-    "businessImpact": "Loss of administrative tools.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "reg add \"HKCU\\Software\\Policies\\Microsoft\\Windows\\System\" /v DisableCMD /t REG_DWORD /d 1 /f && start cmd",
-    "dynamicRecovery": [
-      {
-        "name": "Enable Command Prompt",
-        "script": "reg delete \"HKCU\\Software\\Policies\\Microsoft\\Windows\\System\" /v DisableCMD /f"
-      }
-    ],
-    "aiSummary": "AI detected Command Prompt Disabled. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-013",
-    "threatName": "Registry Run Key Persistence",
-    "category": "Persistence",
-    "mitreMapping": "T1000",
-    "severity": "MEDIUM",
-    "description": "Adds a persistent run key.",
-    "businessImpact": "Malware persists across reboots.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
+    "immediateAction": "Purge Malicious Registry Entry",
     "attackScript": "reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\" /v AstraRogue /t REG_SZ /d \"calc.exe\" /f && start regedit",
     "dynamicRecovery": [
       {
-        "name": "Remove Run Key",
+        "name": "Purge Rogue Run Key",
         "script": "reg delete \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\" /v AstraRogue /f"
+      },
+      {
+        "name": "Verify Clean Registry Baseline",
+        "script": "powershell -Command \"Get-ItemProperty 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run' -ErrorAction SilentlyContinue\""
       }
     ],
-    "aiSummary": "AI detected Registry Run Key Persistence. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "Autorun persistence hook eliminated from Windows registry baseline.",
+    "estimatedResolutionTime": "10 seconds"
   },
   {
-    "threatId": "THREAT-2026-014",
-    "threatName": "Windows Defender Real-time Disabled",
+    "threatId": "THREAT-2026-005",
+    "threatName": "Hosts File DNS Hijacking",
     "category": "Evasion",
-    "mitreMapping": "T1000",
+    "mitreMapping": "T1565.001",
     "severity": "HIGH",
-    "description": "Disables AV protection.",
-    "businessImpact": "System exposed to malware.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "description": "Appends unauthorized loopback DNS redirection into Windows hosts file.",
+    "businessImpact": "Traffic to banking or corporate portals redirected to adversary proxy.",
+    "detectionLogic": "HostsMonitor SHA-256 integrity check mismatch detected against baseline hash.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "powershell -Command \"Set-MpPreference -DisableRealtimeMonitoring $true\" && start windowsdefender:",
+    "immediateAction": "Restore Default Clean Hosts Baseline",
+    "attackScript": "powershell -Command \"Add-Content -Path 'C:\\Windows\\System32\\drivers\\etc\\hosts' -Value '127.0.0.1 astra-internal-bank.com' -Force\" && notepad C:\\Windows\\System32\\drivers\\etc\\hosts",
     "dynamicRecovery": [
       {
-        "name": "Enable Defender",
-        "script": "powershell -Command \"Set-MpPreference -DisableRealtimeMonitoring $false\""
+        "name": "Restore Hosts Baseline",
+        "script": "powershell -Command \"(Get-Content 'C:\\Windows\\System32\\drivers\\etc\\hosts') | Where-Object { $_ -notmatch 'astra-internal-bank.com' } | Set-Content 'C:\\Windows\\System32\\drivers\\etc\\hosts' -Force\""
       }
     ],
-    "aiSummary": "AI detected Windows Defender Real-time Disabled. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "Hosts file restored to clean state. DNS integrity baseline confirmed.",
+    "estimatedResolutionTime": "12 seconds"
   },
   {
-    "threatId": "THREAT-2026-015",
-    "threatName": "Firewall Disabled",
+    "threatId": "THREAT-2026-006",
+    "threatName": "Unauthorized Windows Firewall Shutdown",
     "category": "Evasion",
-    "mitreMapping": "T1000",
+    "mitreMapping": "T1562.001",
     "severity": "CRITICAL",
-    "description": "Drops Windows Firewall.",
-    "businessImpact": "Unrestricted network access.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "description": "Adversary forces Windows Defender Firewall state to OFF across all profiles.",
+    "businessImpact": "Endpoint exposed to inbound network worm propagation and exploit scanning.",
+    "detectionLogic": "FirewallMonitor polled Windows NetSecurity state and caught disabled profile.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
+    "immediateAction": "Force-Enable Windows Defender Firewall",
     "attackScript": "netsh advfirewall set allprofiles state off && start firewall.cpl",
     "dynamicRecovery": [
       {
-        "name": "Enable Firewall",
+        "name": "Enable All Firewall Profiles",
         "script": "netsh advfirewall set allprofiles state on"
+      },
+      {
+        "name": "Verify Firewall Telemetry",
+        "script": "powershell -Command \"Get-NetFirewallProfile | Select-Object Name, Enabled\""
       }
     ],
-    "aiSummary": "AI detected Firewall Disabled. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "Host firewall re-enabled across Domain, Private, and Public profiles.",
+    "estimatedResolutionTime": "8 seconds"
   },
   {
-    "threatId": "THREAT-2026-021",
-    "threatName": "Rogue Listening Port (4444)",
-    "category": "C2",
-    "mitreMapping": "T1000",
+    "threatId": "THREAT-2026-007",
+    "threatName": "Windows Defender Real-Time Tamper",
+    "category": "Evasion",
+    "mitreMapping": "T1562.001",
     "severity": "CRITICAL",
-    "description": "Opens a backdoor listening port.",
-    "businessImpact": "Remote access granted.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "description": "Adversary issues command to disable Windows Defender antivirus real-time inspection.",
+    "businessImpact": "Endpoint antivirus neutralized, allowing execution of unverified binaries.",
+    "detectionLogic": "DefenderMonitor detected DisableRealtimeMonitoring set to true.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start /b powershell -Command \"$listener = [System.Net.Sockets.TcpListener]4444; $listener.Start(); while($true){ Start-Sleep -Seconds 1 }\" && timeout 2 && cmd /c netstat -ano | findstr 4444",
+    "immediateAction": "Enforce Microsoft Defender Protection",
+    "attackScript": "powershell -Command \"Set-MpPreference -DisableRealtimeMonitoring $true\" && start windowsdefender:",
     "dynamicRecovery": [
       {
-        "name": "Close Port 4444",
-        "script": "powershell -Command \"Get-Process | Where-Object {$_.ProcessName -match 'powershell'} | Stop-Process -Force\""
+        "name": "Re-enable Real-Time AV Monitoring",
+        "script": "powershell -Command \"Set-MpPreference -DisableRealtimeMonitoring $false\""
+      },
+      {
+        "name": "Trigger Windows Defender Fast Audit",
+        "script": "powershell -Command \"Get-MpComputerStatus | Select-Object RealTimeProtectionEnabled\""
       }
     ],
-    "aiSummary": "AI detected Rogue Listening Port (4444). Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "Microsoft Defender real-time protection forced back to enabled state.",
+    "estimatedResolutionTime": "10 seconds"
   },
   {
-    "threatId": "THREAT-2026-022",
-    "threatName": "Data Exfiltration Flood",
+    "threatId": "THREAT-2026-008",
+    "threatName": "Data Exfiltration Simulation",
     "category": "Exfiltration",
-    "mitreMapping": "T1000",
+    "mitreMapping": "T1048",
     "severity": "HIGH",
-    "description": "Massive continuous outbound traffic.",
-    "businessImpact": "Data theft in progress.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "description": "Continuous high-volume data egress simulating intellectual property theft.",
+    "businessImpact": "Data loss and exfiltration of proprietary credentials.",
+    "detectionLogic": "HardwareTelemetryService flagged anomalous sustained network buffer transmission.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
+    "immediateAction": "Terminate Exfiltration Process Tree",
     "attackScript": "start /b ping -t 8.8.8.8 -l 65500 && start taskmgr",
     "dynamicRecovery": [
       {
         "name": "Kill Exfiltration Process",
         "script": "taskkill /F /IM ping.exe"
+      },
+      {
+        "name": "Verify Network Stream Clean",
+        "script": "powershell -Command \"Get-Process ping -ErrorAction SilentlyContinue\""
       }
     ],
-    "aiSummary": "AI detected Data Exfiltration Flood. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "Exfiltration process killed. Outbound socket transmission terminated.",
+    "estimatedResolutionTime": "5 seconds"
   },
   {
-    "threatId": "THREAT-2026-023",
-    "threatName": "Proxy Hijack",
-    "category": "Network",
-    "mitreMapping": "T1000",
+    "threatId": "THREAT-2026-009",
+    "threatName": "Rogue Command Prompt Shell Spawn",
+    "category": "Execution",
+    "mitreMapping": "T1059.003",
     "severity": "MEDIUM",
-    "description": "Routes all traffic through malicious proxy.",
-    "businessImpact": "Traffic interception.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "description": "Unauthorized interactive command prompt launched by background service.",
+    "businessImpact": "Interactive shell access for manual adversary reconnaissance.",
+    "detectionLogic": "ProcessMonitor caught suspicious shell spawn without parent explorer context.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v ProxyEnable /t REG_DWORD /d 1 /f && reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v ProxyServer /t REG_SZ /d \"127.0.0.1:8080\" /f",
+    "immediateAction": "Snipe & Terminate Rogue Shell",
+    "attackScript": "start cmd.exe /k \"color 4F & title ASTRA_MALICIOUS_SHELL_TEST & echo [ALERT] Malicious CMD Shell Launched! & timeout 15\"",
     "dynamicRecovery": [
       {
-        "name": "Disable Proxy",
-        "script": "reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v ProxyEnable /t REG_DWORD /d 0 /f"
+        "name": "Terminate Rogue Shell",
+        "script": "taskkill /F /FI \"WINDOWTITLE eq ASTRA_MALICIOUS_SHELL_TEST*\""
       }
     ],
-    "aiSummary": "AI detected Proxy Hijack. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "Adversary interactive CMD shell terminated cleanly.",
+    "estimatedResolutionTime": "5 seconds"
   },
   {
-    "threatId": "THREAT-2026-024",
-    "threatName": "Hosts File Poisoning",
-    "category": "Network",
-    "mitreMapping": "T1000",
-    "severity": "CRITICAL",
-    "description": "Redirects legitimate traffic.",
-    "businessImpact": "Phishing and MITM attacks.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "echo 1.1.1.1 google.com >> C:\\Windows\\System32\\drivers\\etc\\hosts && notepad C:\\Windows\\System32\\drivers\\etc\\hosts",
-    "dynamicRecovery": [
-      {
-        "name": "Clean Hosts File",
-        "script": "powershell -Command \"(Get-Content C:\\Windows\\System32\\drivers\\etc\\hosts) -notmatch 'google.com' | Set-Content C:\\Windows\\System32\\drivers\\etc\\hosts\""
-      }
-    ],
-    "aiSummary": "AI detected Hosts File Poisoning. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-025",
-    "threatName": "Disable Network Adapter",
-    "category": "Network",
-    "mitreMapping": "T1000",
-    "severity": "MEDIUM",
-    "description": "Disables physical connection.",
-    "businessImpact": "Loss of connectivity.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start ncpa.cpl",
-    "dynamicRecovery": [
-      {
-        "name": "Reset Adapter",
-        "script": "echo OK"
-      }
-    ],
-    "aiSummary": "AI detected Disable Network Adapter. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-031",
-    "threatName": "Guest Account Enabled",
-    "category": "Identity",
-    "mitreMapping": "T1000",
-    "severity": "MEDIUM",
-    "description": "Enables dormant guest account.",
-    "businessImpact": "Unauthorized access.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "net user Guest /active:yes && start lusrmgr.msc",
-    "dynamicRecovery": [
-      {
-        "name": "Disable Guest",
-        "script": "net user Guest /active:no"
-      }
-    ],
-    "aiSummary": "AI detected Guest Account Enabled. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-032",
-    "threatName": "Guest Promoted to Admin",
-    "category": "Privilege Escalation",
-    "mitreMapping": "T1000",
+    "threatId": "THREAT-2026-010",
+    "threatName": "Hidden Malware Staging Directory",
+    "category": "Defense Evasion",
+    "mitreMapping": "T1564.001",
     "severity": "HIGH",
-    "description": "Escalates guest to admin.",
-    "businessImpact": "Full system compromise.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "description": "Creates a hidden directory with system attributes to evade forensic scans.",
+    "businessImpact": "Staging area for malicious binaries and exfiltrated databases.",
+    "detectionLogic": "FileSystemMonitor intercepted hidden folder creation under C:\\Astra\\Demo.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "net user Guest /active:yes && net localgroup Administrators Guest /add && start lusrmgr.msc",
+    "immediateAction": "Purge Hidden Staging Directory",
+    "attackScript": "mkdir C:\\Astra\\Demo\\HiddenMalware && attrib +h C:\\Astra\\Demo\\HiddenMalware && explorer C:\\Astra\\Demo",
     "dynamicRecovery": [
       {
-        "name": "Remove Admin Rights",
-        "script": "net localgroup Administrators Guest /delete && net user Guest /active:no"
+        "name": "Remove Hidden Directory",
+        "script": "rmdir /S /Q C:\\Astra\\Demo\\HiddenMalware"
       }
     ],
-    "aiSummary": "AI detected Guest Promoted to Admin. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "Hidden directory unmasked and purged from local disk storage.",
+    "estimatedResolutionTime": "8 seconds"
   },
   {
-    "threatId": "THREAT-2026-033",
-    "threatName": "Rogue User Creation",
-    "category": "Identity",
-    "mitreMapping": "T1000",
-    "severity": "CRITICAL",
-    "description": "Creates a new rogue local user.",
-    "businessImpact": "Persistent access.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "net user Hacker Password123! /add && start lusrmgr.msc",
-    "dynamicRecovery": [
-      {
-        "name": "Delete Rogue User",
-        "script": "net user Hacker /delete"
-      }
-    ],
-    "aiSummary": "AI detected Rogue User Creation. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-034",
-    "threatName": "Password Policy Weakened",
-    "category": "Identity",
-    "mitreMapping": "T1000",
+    "threatId": "THREAT-2026-011",
+    "threatName": "Rogue Scheduled Task Injection",
+    "category": "Persistence",
+    "mitreMapping": "T1053.005",
     "severity": "HIGH",
-    "description": "Weakens local password policies.",
-    "businessImpact": "Susceptible to brute force.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "description": "Adversary schedules an automated task to maintain persistence across reboots.",
+    "businessImpact": "Malware re-executes automatically via Windows Task Scheduler.",
+    "detectionLogic": "ScheduledTaskMonitor detected new task creation targeting non-system binaries.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "net accounts /minpwlen:0 /maxpwage:unlimited && start secpol.msc",
+    "immediateAction": "Unregister & Purge Scheduled Task",
+    "attackScript": "schtasks /create /tn \"AstraDemoTask\" /tr \"calc.exe\" /sc onlogon /f",
     "dynamicRecovery": [
       {
-        "name": "Restore Password Policy",
-        "script": "net accounts /minpwlen:8 /maxpwage:90"
+        "name": "Delete Scheduled Task",
+        "script": "schtasks /delete /tn \"AstraDemoTask\" /f"
       }
     ],
-    "aiSummary": "AI detected Password Policy Weakened. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "Malicious scheduled task deregistered and removed from Task Scheduler.",
+    "estimatedResolutionTime": "10 seconds"
   },
   {
-    "threatId": "THREAT-2026-035",
-    "threatName": "RDP Enabled",
-    "category": "Identity",
-    "mitreMapping": "T1000",
+    "threatId": "THREAT-2026-012",
+    "threatName": "Malicious Batch Script Drop",
+    "category": "Execution",
+    "mitreMapping": "T1059.005",
     "severity": "MEDIUM",
-    "description": "Enables Remote Desktop.",
-    "businessImpact": "Remote access vulnerability.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "description": "Drops an executable batch payload designed to disable local security utilities.",
+    "businessImpact": "Automated execution of adversarial discovery commands.",
+    "detectionLogic": "FileSystemMonitor caught new .bat creation in temporary directories.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "reg add \"HKLM\\System\\CurrentControlSet\\Control\\Terminal Server\" /v fDenyTSConnections /t REG_DWORD /d 0 /f && start sysdm.cpl",
+    "immediateAction": "Quarantine Batch Payload",
+    "attackScript": "mkdir C:\\Astra\\Demo\\Temp && echo timeout /t 10 > C:\\Astra\\Demo\\Temp\\malicious.bat && explorer C:\\Astra\\Demo\\Temp",
     "dynamicRecovery": [
       {
-        "name": "Disable RDP",
+        "name": "Delete Malicious Script",
+        "script": "del /f /q C:\\Astra\\Demo\\Temp\\malicious.bat"
+      }
+    ],
+    "aiSummary": "Malicious batch script deleted before execution authorization.",
+    "estimatedResolutionTime": "5 seconds"
+  },
+  {
+    "threatId": "THREAT-2026-013",
+    "threatName": "SQL Injection Exfiltration Pipe",
+    "category": "Exfiltration",
+    "mitreMapping": "T1190",
+    "severity": "HIGH",
+    "description": "Simulates web-tier SQL injection exfiltrating database tables to loopback.",
+    "businessImpact": "Customer records and hashed credential theft.",
+    "detectionLogic": "API gateway flagged repetitive union-select exfiltration payload string.",
+    "dashboardAnimation": "pulse_red",
+    "immediateAction": "Sever Query Stream & Quarantine Connection",
+    "attackScript": "echo EXFILTRATED_USERS_DB_DUMP > C:\\Astra\\Demo\\sql_dump.txt && explorer C:\\Astra\\Demo",
+    "dynamicRecovery": [
+      {
+        "name": "Purge Extracted Database Dump",
+        "script": "del /f /q C:\\Astra\\Demo\\sql_dump.txt"
+      }
+    ],
+    "aiSummary": "SQL exfiltration dump neutralized. Web application sanitization verified.",
+    "estimatedResolutionTime": "8 seconds"
+  },
+  {
+    "threatId": "THREAT-2026-014",
+    "threatName": "Phishing Document Dropper Simulation",
+    "category": "Initial Access",
+    "mitreMapping": "T1566.001",
+    "severity": "HIGH",
+    "description": "Double-extension spoofed invoice dropper (Invoice_March.pdf.exe) written to disk.",
+    "businessImpact": "Initial workstation compromise via social engineering attachment.",
+    "detectionLogic": "FileSystemMonitor flagged executable binary masquerading as PDF document.",
+    "dashboardAnimation": "pulse_red",
+    "immediateAction": "Quarantine Spoofed Dropper Binary",
+    "attackScript": "mkdir C:\\Astra\\Demo\\Downloads && echo FAKE_PAYLOAD > C:\\Astra\\Demo\\Downloads\\Invoice_Q3.pdf.exe && explorer C:\\Astra\\Demo\\Downloads",
+    "dynamicRecovery": [
+      {
+        "name": "Quarantine Spoofed Binary",
+        "script": "del /f /q C:\\Astra\\Demo\\Downloads\\Invoice_Q3.pdf.exe"
+      }
+    ],
+    "aiSummary": "Phishing attachment quarantined and isolated from user desktop.",
+    "estimatedResolutionTime": "8 seconds"
+  },
+  {
+    "threatId": "THREAT-2026-015",
+    "threatName": "Unauthorized RDP Remote Access Enable",
+    "category": "Lateral Movement",
+    "mitreMapping": "T1021.001",
+    "severity": "HIGH",
+    "description": "Adversary modifies registry to enable Remote Desktop (fDenyTSConnections = 0).",
+    "businessImpact": "Inbound remote desktop access permitted without standard bastion controls.",
+    "detectionLogic": "RDPMonitor polled Terminal Server registry settings and flagged unauthorized opening.",
+    "dashboardAnimation": "pulse_red",
+    "immediateAction": "Enforce RDP Lockdown in Registry",
+    "attackScript": "reg add \"HKLM\\System\\CurrentControlSet\\Control\\Terminal Server\" /v fDenyTSConnections /t REG_DWORD /d 0 /f",
+    "dynamicRecovery": [
+      {
+        "name": "Disable Remote Desktop Protocol",
         "script": "reg add \"HKLM\\System\\CurrentControlSet\\Control\\Terminal Server\" /v fDenyTSConnections /t REG_DWORD /d 1 /f"
       }
     ],
-    "aiSummary": "AI detected RDP Enabled. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "Remote Desktop Protocol locked down in Windows registry baseline.",
+    "estimatedResolutionTime": "10 seconds"
   },
   {
-    "threatId": "THREAT-2026-036",
-    "threatName": "Advanced Subversion Variation 36",
-    "category": "Evasion",
-    "mitreMapping": "T1000",
+    "threatId": "THREAT-2026-016",
+    "threatName": "Mimikatz Memory Dump Simulation",
+    "category": "Credential Access",
+    "mitreMapping": "T1003.001",
     "severity": "CRITICAL",
-    "description": "Simulates a generic payload execution.",
-    "businessImpact": "Potential code execution.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "description": "Adversary launches credential access tool to extract plaintext passwords from LSASS.",
+    "businessImpact": "Domain administrator credential compromise and lateral movement.",
+    "detectionLogic": "ProcessMonitor caught execution of known credential dumper binary signature.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start calc.exe",
+    "immediateAction": "Force-Kill Rogue Process & Protect LSASS Handles",
+    "attackScript": "start notepad.exe && timeout 1 && echo SIMULATED_MIMIKATZ_LSASS_DUMP > C:\\Astra\\Demo\\lsass.dmp && explorer C:\\Astra\\Demo",
     "dynamicRecovery": [
       {
-        "name": "Kill Calc",
-        "script": "taskkill /F /IM calc.exe"
-      }
-    ],
-    "aiSummary": "AI detected Advanced Subversion Variation 36. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-037",
-    "threatName": "Advanced Subversion Variation 37",
-    "category": "Evasion",
-    "mitreMapping": "T1000",
-    "severity": "MEDIUM",
-    "description": "Simulates a generic payload execution.",
-    "businessImpact": "Potential code execution.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start calc.exe",
-    "dynamicRecovery": [
+        "name": "Purge LSASS Memory Dump File",
+        "script": "del /f /q C:\\Astra\\Demo\\lsass.dmp"
+      },
       {
-        "name": "Kill Calc",
-        "script": "taskkill /F /IM calc.exe"
+        "name": "Terminate Staged Memory Tools",
+        "script": "taskkill /F /IM notepad.exe"
       }
     ],
-    "aiSummary": "AI detected Advanced Subversion Variation 37. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "Credential dumper terminated and staged memory dump files purged.",
+    "estimatedResolutionTime": "10 seconds"
   },
   {
-    "threatId": "THREAT-2026-038",
-    "threatName": "Advanced Subversion Variation 38",
-    "category": "Evasion",
-    "mitreMapping": "T1000",
-    "severity": "HIGH",
-    "description": "Simulates a generic payload execution.",
-    "businessImpact": "Potential code execution.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start calc.exe",
-    "dynamicRecovery": [
-      {
-        "name": "Kill Calc",
-        "script": "taskkill /F /IM calc.exe"
-      }
-    ],
-    "aiSummary": "AI detected Advanced Subversion Variation 38. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-039",
-    "threatName": "Advanced Subversion Variation 39",
-    "category": "Evasion",
-    "mitreMapping": "T1000",
+    "threatId": "THREAT-2026-017",
+    "threatName": "Netcat Reverse Shell Listener",
+    "category": "Command and Control",
+    "mitreMapping": "T1059",
     "severity": "CRITICAL",
-    "description": "Simulates a generic payload execution.",
-    "businessImpact": "Potential code execution.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "description": "Adversary opens a reverse shell listener bound to port 4444 on the endpoint.",
+    "businessImpact": "Direct command prompt access granted to remote attacking machine.",
+    "detectionLogic": "NetworkMonitor detected unauthorized TCP port 4444 listening state.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start calc.exe",
+    "immediateAction": "Terminate Listener Process & Close Socket",
+    "attackScript": "start /b powershell -Command \"$l = [System.Net.Sockets.TcpListener]4444; $l.Start(); while($true){ Start-Sleep -Seconds 1 }\" && timeout 2 && cmd /c netstat -ano | findstr 4444",
     "dynamicRecovery": [
       {
-        "name": "Kill Calc",
-        "script": "taskkill /F /IM calc.exe"
+        "name": "Terminate Shell Listener",
+        "script": "powershell -Command \"Get-Process | Where-Object {$_.CommandLine -like '*4444*'} | Stop-Process -Force\""
       }
     ],
-    "aiSummary": "AI detected Advanced Subversion Variation 39. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "Reverse shell process terminated and TCP 4444 closed.",
+    "estimatedResolutionTime": "10 seconds"
   },
   {
-    "threatId": "THREAT-2026-040",
-    "threatName": "Advanced Subversion Variation 40",
-    "category": "Evasion",
-    "mitreMapping": "T1000",
+    "threatId": "THREAT-2026-018",
+    "threatName": "DDoS Network Flood Simulator",
+    "category": "Impact",
+    "mitreMapping": "T1499",
     "severity": "HIGH",
-    "description": "Simulates a generic payload execution.",
-    "businessImpact": "Potential code execution.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "description": "Continuous high-frequency packet generation flooding the local network interface.",
+    "businessImpact": "Denial of service, latency spikes, and gateway disconnects.",
+    "detectionLogic": "HardwareTelemetryService flagged abrupt packet rate surge.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start calc.exe",
+    "immediateAction": "Enforce Network Packet Filtering",
+    "attackScript": "start /b ping -t 127.0.0.1 -l 1000",
     "dynamicRecovery": [
       {
-        "name": "Kill Calc",
-        "script": "taskkill /F /IM calc.exe"
+        "name": "Terminate Flood Worker",
+        "script": "taskkill /F /IM ping.exe"
       }
     ],
-    "aiSummary": "AI detected Advanced Subversion Variation 40. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "DDoS packet flood process terminated. Network latency returned to baseline.",
+    "estimatedResolutionTime": "5 seconds"
   },
   {
-    "threatId": "THREAT-2026-041",
-    "threatName": "Advanced Subversion Variation 41",
-    "category": "Evasion",
-    "mitreMapping": "T1000",
-    "severity": "MEDIUM",
-    "description": "Simulates a generic payload execution.",
-    "businessImpact": "Potential code execution.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start calc.exe",
-    "dynamicRecovery": [
-      {
-        "name": "Kill Calc",
-        "script": "taskkill /F /IM calc.exe"
-      }
-    ],
-    "aiSummary": "AI detected Advanced Subversion Variation 41. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-042",
-    "threatName": "Advanced Subversion Variation 42",
-    "category": "Evasion",
-    "mitreMapping": "T1000",
+    "threatId": "THREAT-2026-019",
+    "threatName": "Zero-Day Memory Heap Spray",
+    "category": "Defense Evasion",
+    "mitreMapping": "T1203",
     "severity": "CRITICAL",
-    "description": "Simulates a generic payload execution.",
-    "businessImpact": "Potential code execution.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "description": "Simulates memory corruption exploit attempting to bypass ASLR and DEP.",
+    "businessImpact": "Remote code execution in the context of user applications.",
+    "detectionLogic": "Heuristic memory protection detected repetitive NOP-sled memory allocation pattern.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start calc.exe",
+    "immediateAction": "Flush Injected Memory Buffers",
+    "attackScript": "echo ASTRA_HEAP_SPRAY_SIMULATION > C:\\Astra\\Demo\\heap_dump.bin && explorer C:\\Astra\\Demo",
     "dynamicRecovery": [
       {
-        "name": "Kill Calc",
-        "script": "taskkill /F /IM calc.exe"
+        "name": "Purge Heap Simulation Dump",
+        "script": "del /f /q C:\\Astra\\Demo\\heap_dump.bin"
       }
     ],
-    "aiSummary": "AI detected Advanced Subversion Variation 42. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "Heap corruption pattern neutralized. Application execution integrity intact.",
+    "estimatedResolutionTime": "10 seconds"
   },
   {
-    "threatId": "THREAT-2026-043",
-    "threatName": "Advanced Subversion Variation 43",
-    "category": "Evasion",
-    "mitreMapping": "T1000",
-    "severity": "MEDIUM",
-    "description": "Simulates a generic payload execution.",
-    "businessImpact": "Potential code execution.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start calc.exe",
-    "dynamicRecovery": [
-      {
-        "name": "Kill Calc",
-        "script": "taskkill /F /IM calc.exe"
-      }
-    ],
-    "aiSummary": "AI detected Advanced Subversion Variation 43. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-044",
-    "threatName": "Advanced Subversion Variation 44",
-    "category": "Evasion",
-    "mitreMapping": "T1000",
+    "threatId": "THREAT-2026-020",
+    "threatName": "Cryptominer CPU Exhaustion Simulation",
+    "category": "Resource Hijacking",
+    "mitreMapping": "T1496",
     "severity": "HIGH",
-    "description": "Simulates a generic payload execution.",
-    "businessImpact": "Potential code execution.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
+    "description": "Adversary executes unauthorized XMRig cryptominer driving CPU utilization to 100%.",
+    "businessImpact": "Endpoint degradation, hardware thermal throttling, and battery drain.",
+    "detectionLogic": "CPUMonitor flagged persistent maximum thread load without foreground GUI activity.",
     "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start calc.exe",
+    "immediateAction": "Terminate Rogue Mining Process Tree",
+    "attackScript": "start /b powershell -Command \"while($true){ $x = 1 }\"",
     "dynamicRecovery": [
       {
-        "name": "Kill Calc",
-        "script": "taskkill /F /IM calc.exe"
-      }
-    ],
-    "aiSummary": "AI detected Advanced Subversion Variation 44. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-045",
-    "threatName": "Advanced Subversion Variation 45",
-    "category": "Evasion",
-    "mitreMapping": "T1000",
-    "severity": "CRITICAL",
-    "description": "Simulates a generic payload execution.",
-    "businessImpact": "Potential code execution.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start calc.exe",
-    "dynamicRecovery": [
+        "name": "Terminate Miner Process",
+        "script": "powershell -Command \"Get-Process powershell | Where-Object {$_.CPU -gt 5} | Stop-Process -Force\""
+      },
       {
-        "name": "Kill Calc",
-        "script": "taskkill /F /IM calc.exe"
+        "name": "Verify CPU Baseline Recovery",
+        "script": "powershell -Command \"Get-WmiObject Win32_Processor | Select-Object LoadPercentage\""
       }
     ],
-    "aiSummary": "AI detected Advanced Subversion Variation 45. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-046",
-    "threatName": "Advanced Subversion Variation 46",
-    "category": "Evasion",
-    "mitreMapping": "T1000",
-    "severity": "HIGH",
-    "description": "Simulates a generic payload execution.",
-    "businessImpact": "Potential code execution.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start calc.exe",
-    "dynamicRecovery": [
-      {
-        "name": "Kill Calc",
-        "script": "taskkill /F /IM calc.exe"
-      }
-    ],
-    "aiSummary": "AI detected Advanced Subversion Variation 46. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-047",
-    "threatName": "Advanced Subversion Variation 47",
-    "category": "Evasion",
-    "mitreMapping": "T1000",
-    "severity": "MEDIUM",
-    "description": "Simulates a generic payload execution.",
-    "businessImpact": "Potential code execution.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start calc.exe",
-    "dynamicRecovery": [
-      {
-        "name": "Kill Calc",
-        "script": "taskkill /F /IM calc.exe"
-      }
-    ],
-    "aiSummary": "AI detected Advanced Subversion Variation 47. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-048",
-    "threatName": "Advanced Subversion Variation 48",
-    "category": "Evasion",
-    "mitreMapping": "T1000",
-    "severity": "CRITICAL",
-    "description": "Simulates a generic payload execution.",
-    "businessImpact": "Potential code execution.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start calc.exe",
-    "dynamicRecovery": [
-      {
-        "name": "Kill Calc",
-        "script": "taskkill /F /IM calc.exe"
-      }
-    ],
-    "aiSummary": "AI detected Advanced Subversion Variation 48. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-049",
-    "threatName": "Advanced Subversion Variation 49",
-    "category": "Evasion",
-    "mitreMapping": "T1000",
-    "severity": "MEDIUM",
-    "description": "Simulates a generic payload execution.",
-    "businessImpact": "Potential code execution.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start calc.exe",
-    "dynamicRecovery": [
-      {
-        "name": "Kill Calc",
-        "script": "taskkill /F /IM calc.exe"
-      }
-    ],
-    "aiSummary": "AI detected Advanced Subversion Variation 49. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
-  },
-  {
-    "threatId": "THREAT-2026-050",
-    "threatName": "Advanced Subversion Variation 50",
-    "category": "Evasion",
-    "mitreMapping": "T1000",
-    "severity": "HIGH",
-    "description": "Simulates a generic payload execution.",
-    "businessImpact": "Potential code execution.",
-    "detectionLogic": "Behavioral anomaly detected on endpoint.",
-    "dashboardAnimation": "pulse_red",
-    "immediateAction": "Identify and Isolate",
-    "attackScript": "start calc.exe",
-    "dynamicRecovery": [
-      {
-        "name": "Kill Calc",
-        "script": "taskkill /F /IM calc.exe"
-      }
-    ],
-    "aiSummary": "AI detected Advanced Subversion Variation 50. Immediate containment required.",
-    "estimatedResolutionTime": "15 minutes"
+    "aiSummary": "Cryptomining thread force-killed. CPU returned to normal operating temperature.",
+    "estimatedResolutionTime": "5 seconds"
   }
 ]

@@ -27,8 +27,15 @@ public class HeartbeatService {
     private String version;
 
     private final AgentConfigHelper configHelper;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = createTimeoutRestTemplate();
     private final SystemInfo systemInfo = new SystemInfo();
+
+    private static RestTemplate createTimeoutRestTemplate() {
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(1500);
+        factory.setReadTimeout(2500);
+        return new RestTemplate(factory);
+    }
     
     private String lastCommandId = "none";
     private String lastCommandStatus = "none";
@@ -78,7 +85,7 @@ public class HeartbeatService {
                 .overlayStatus("AVAILABLE")
                 .cpuUsage(Math.round(cpu * 10.0) / 10.0)
                 .ramUsage(Math.round(ram * 10.0) / 10.0)
-                .timestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                .timestamp(java.time.Instant.now().toString())
                 .lastCommandId(lastCommandId)
                 .lastCommandStatus(lastCommandStatus)
                 .build();

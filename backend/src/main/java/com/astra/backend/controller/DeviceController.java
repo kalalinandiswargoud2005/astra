@@ -129,8 +129,13 @@ public class DeviceController {
         log.info("[ASTRA-DISPATCH] Queuing command for Device: {} ({}), Type: {}, Target: {}", 
                 device.getName(), id, commandType, target);
 
-        commandDispatchService.queueCommand(id, incidentId, commandType, params);
-        return ResponseEntity.ok(Map.of("status", "queued", "command", commandType, "deviceId", id.toString()));
+        com.astra.backend.entity.DeviceCommand cmd = commandDispatchService.queueCommand(id, incidentId, commandType, params);
+        return ResponseEntity.ok(Map.of(
+                "status", "queued",
+                "command", commandType,
+                "deviceId", id.toString(),
+                "commandId", cmd != null && cmd.getId() != null ? cmd.getId().toString() : ""
+        ));
     }
 
     @PostMapping("/{id}/restart")

@@ -16,10 +16,25 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const subscriptionsRef = useRef<Map<string, Set<(message: any) => void>>>(new Map());
 
   useEffect(() => {
-    const rawWsUrl = import.meta.env.VITE_WS_URL || 
-      (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
-        ? 'wss://aegisx-backend-2k67.onrender.com/ws'
-        : 'ws://localhost:8080/ws');
+    const getWsUrl = (): string => {
+      if (import.meta.env.VITE_WS_URL) return import.meta.env.VITE_WS_URL;
+      if (typeof window !== 'undefined') {
+        const host = window.location.hostname;
+        if (
+          host === 'localhost' ||
+          host === '127.0.0.1' ||
+          /^192\.168\./.test(host) ||
+          /^10\./.test(host) ||
+          /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host) ||
+          window.location.protocol === 'http:'
+        ) {
+          const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+          return `${proto}//${host}:8080/ws`;
+        }
+      }
+      return 'wss://aegisx-backend-2k67.onrender.com/ws';
+    };
+    const rawWsUrl = getWsUrl();
     const wsUrl = rawWsUrl.endsWith('/ws')
       ? rawWsUrl
       : `${rawWsUrl.replace(/\/+$/, '')}/ws`;

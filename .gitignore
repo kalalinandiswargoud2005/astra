@@ -28,3 +28,23 @@ Thumbs.db
 docs/
 documentation/
 reports/
+
+# Python & Local Scratch
+__pycache__/
+*.pyc
+analyze_batch10.py
+build_exact_synopsis.py
+build_full_astra_paper.py
+convert_report_to_docx.py
+generate_astra_figures.py
+generate_synopsis_docx.py
+keep_alive_render.bat
+keep_alive_render.py
+verify_batch10.py
+batch_10_dump.json
+batch_10_full_text.txt
+backend/incident_test.json
+astra_figures/
+page1_extracted_logo.png
+synopsis_page_*.png
+

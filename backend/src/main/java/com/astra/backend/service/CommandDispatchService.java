@@ -18,6 +18,7 @@ public class CommandDispatchService {
 
     private final DeviceCommandRepository commandRepository;
     private final DeviceRepository deviceRepository;
+    private final com.astra.backend.websocket.WebSocketPublisher webSocketPublisher;
 
     private UUID resolveDeviceId(String target) {
         if (target == null || target.isBlank()) return null;
@@ -89,7 +90,7 @@ public class CommandDispatchService {
         }
     }
 
-    public void queueCommand(UUID deviceId, UUID incidentId, String commandType, String params) {
+    public DeviceCommand queueCommand(UUID deviceId, UUID incidentId, String commandType, String params) {
         DeviceCommand cmd = DeviceCommand.builder()
                 .deviceId(deviceId)
                 .incidentId(incidentId)
@@ -97,8 +98,24 @@ public class CommandDispatchService {
                 .parameters(params != null ? params : "{}")
                 .status("PENDING")
                 .build();
-        commandRepository.save(cmd);
+        cmd = commandRepository.saveAndFlush(cmd);
         log.info("[ASTRA-DISPATCH] Queued command: deviceId={}, commandId={}, incidentId={}, commandType={}",
                 deviceId, cmd.getId(), incidentId, commandType);
+
+        try {
+            if (webSocketPublisher != null) {
+                webSocketPublisher.broadcastCommandEvent(java.util.Map.of(
+                        "commandId", cmd.getId().toString(),
+                        "deviceId", deviceId.toString(),
+                        "commandType", commandType,
+                        "status", "QUEUED",
+                        "timestamp", java.time.LocalDateTime.now().toString()
+                ));
+            }
+        } catch (Exception e) {
+            log.warn("[ASTRA-DISPATCH] Failed to broadcast queued command event: {}", e.getMessage());
+        }
+
+        return cmd;
     }
 }

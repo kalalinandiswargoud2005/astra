@@ -24,15 +24,30 @@ import java.util.Map;
 public class RemediationCommandPoller {
 
     private final AgentConfigHelper configHelper;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = createTimeoutRestTemplate();
     private final RemediationExecutor executor;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Scheduled(fixedRate = 200) // Near-instant 200ms polling for real-time simultaneous execution
+    private static RestTemplate createTimeoutRestTemplate() {
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(1500);
+        factory.setReadTimeout(2000);
+        return new RestTemplate(factory);
+    }
+
+    private int consecutiveErrors = 0;
+
+    @Scheduled(fixedRateString = "${astra.agent.poll-rate-ms:1000}") // Optimized 1s polling (80% network reduction vs 200ms)
     public void pollCommands() {
         String deviceId = configHelper.getDeviceId();
         if (deviceId == null || deviceId.isBlank()) {
             return; // Wait until device identity is resolved via registration
+        }
+
+        // Backoff if backend is persistently down (e.g. Render cold start or network outage)
+        if (consecutiveErrors > 5 && consecutiveErrors % 5 != 0) {
+            consecutiveErrors++;
+            return;
         }
 
         String deviceToken = configHelper.getDeviceToken();
@@ -54,6 +69,8 @@ public class RemediationCommandPoller {
                         request,
                         new ParameterizedTypeReference<List<DeviceCommandDto>>() {}
                 );
+
+                consecutiveErrors = 0;
 
                 List<DeviceCommandDto> commands = response.getBody();
                 if (commands != null && !commands.isEmpty()) {
@@ -95,8 +112,10 @@ public class RemediationCommandPoller {
                     }
                 }
             } catch (HttpStatusCodeException e) {
+                consecutiveErrors++;
                 log.debug("[ASTRA-POLL] Command polling HTTP error from {}: Status={}", backendUrl, e.getStatusCode());
             } catch (Exception e) {
+                consecutiveErrors++;
                 log.debug("[ASTRA-POLL] Command polling network error from {}: {}", backendUrl, e.getMessage());
             }
         }

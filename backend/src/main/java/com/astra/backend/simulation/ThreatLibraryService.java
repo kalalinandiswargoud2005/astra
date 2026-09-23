@@ -18,7 +18,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ThreatLibraryService {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ThreatLibraryService.class);
 
     private final ObjectMapper objectMapper;
     private List<ScenarioDto> scenarios = new ArrayList<>();
@@ -44,3 +43,4 @@ public class ThreatLibraryService {
                 .orElse(null);
     }
 }
+
