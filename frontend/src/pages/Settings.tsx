@@ -1,12 +1,10 @@
 import React from 'react';
 import { Settings as SettingsIcon, Save } from 'lucide-react';
 import { Card, Button, Input, Badge, PageContainer, PageHeader, PageSection } from '@/components/ui';
-import { useTheme } from '@/providers/theme-provider';
 import api from '@/lib/api';
 import { toast } from 'sonner';
 
 export function Settings() {
-  const { theme, setTheme } = useTheme();
   const [responseMode, setResponseMode] = React.useState<'AUTOMATED' | 'MANUAL'>(() => {
     return (localStorage.getItem('astra_response_mode') as 'AUTOMATED' | 'MANUAL') || 'AUTOMATED';
   });
@@ -117,25 +115,7 @@ export function Settings() {
       </Card>
       </PageSection>
 
-      <PageSection className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card>
-          <h3 className="mb-4 text-lg font-medium text-white border-b border-border-color pb-2">Appearance</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-white/70">Theme Preference</label>
-              <select 
-                value={theme} 
-                onChange={(e) => setTheme(e.target.value as any)}
-                className="w-full rounded-md border border-border-color bg-surface/50 px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary"
-              >
-                <option value="dark">Enterprise Dark (Default)</option>
-                <option value="light">Light Mode</option>
-                <option value="system">System Default</option>
-              </select>
-            </div>
-          </div>
-        </Card>
-
+      <PageSection className="grid grid-cols-1 gap-6">
         <Card>
           <h3 className="mb-4 text-lg font-medium text-white border-b border-border-color pb-2">Notifications</h3>
           <div className="space-y-4">

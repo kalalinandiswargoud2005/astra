@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useTheme } from '@/providers/theme-provider';
 
 interface JarvisCoreProps {
     isSpeaking: boolean;

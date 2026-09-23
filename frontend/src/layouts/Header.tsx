@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Moon, Sun, Globe, Bot, Maximize, Minimize } from 'lucide-react';
+import { Search, Bell, Globe, Bot, Maximize, Minimize } from 'lucide-react';
 import { Input, Avatar, Tooltip } from '@/components/ui';
-import { useTheme } from '@/providers/theme-provider';
 import { useAssistant } from '@/providers/AssistantProvider';
 import { useWebSocket } from '@/providers/WebSocketProvider';
 import { motion } from 'framer-motion';
 
 export function Header() {
   const navigate = useNavigate();
-  const { theme, setTheme } = useTheme();
   const { toggleAssistant, isAssistantOpen } = useAssistant();
   const { isConnected } = useWebSocket();
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -121,17 +119,6 @@ export function Header() {
           >
             <Bell size={20} />
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-danger animate-pulse shadow-[0_0_8px_rgba(255,61,113,0.8)]" />
-          </motion.button>
-        </Tooltip>
-
-        <Tooltip content="Toggle Theme">
-          <motion.button
-            whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.1)" }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="rounded-full p-2 text-white/70 hover:text-white transition-colors border border-transparent hover:border-white/20 cursor-pointer"
-          >
-            {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
           </motion.button>
         </Tooltip>
 
